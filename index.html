@@ -432,7 +432,7 @@
     .profile-chip-name {
       font-size: 0.96rem;
       font-weight: 800;
-      max-width: 145px;
+      max-width: 280px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -501,9 +501,9 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 8px 14px 12px;
-      max-width: 1360px;
-      width: 100%;
+      padding: 6px 8px 12px;
+      max-width: 1760px;
+      width: 99%;
       margin: 0 auto;
       gap: 8px;
     }
@@ -666,12 +666,12 @@
       white-space: nowrap;
     }
 
-    /* CIRCULAR / OVAL CASINO TABLE (PC) */
+    /* CIRCULAR / OVAL CASINO TABLE (PC) - EXPANDED HORIZONTALLY */
     .felt-surface {
       flex: 1;
       background:
-        radial-gradient(circle at 50% 51%, var(--felt-center) 0%, var(--felt-mid) 52%, var(--felt-edge) 100%);
-      border-radius: 46% / 42%;
+        radial-gradient(ellipse at 50% 51%, var(--felt-center) 0%, var(--felt-mid) 56%, var(--felt-edge) 100%);
+      border-radius: 30% / 46%;
       border: 11px solid var(--rail-dark);
       box-shadow:
         inset 0 0 70px rgba(0, 0, 0, 0.72),
@@ -679,16 +679,16 @@
         0 0 0 3px var(--gold-dim),
         0 18px 44px rgba(0, 0, 0, 0.78);
       position: relative;
-      min-height: 630px;
-      height: clamp(630px, 69vh, 780px);
+      min-height: 640px;
+      height: clamp(640px, 70vh, 800px);
       overflow: visible;
     }
 
     .felt-surface::before {
       content: "";
       position: absolute;
-      inset: 16px;
-      border-radius: 46% / 42%;
+      inset: 14px;
+      border-radius: 30% / 46%;
       border: 1px dashed rgba(212, 175, 55, 0.22);
       pointer-events: none;
     }
@@ -894,21 +894,21 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-width: 128px;
-      max-width: 195px;
-      padding: 6px 8px;
+      min-width: 146px;
+      max-width: 245px;
+      padding: 7px 10px;
       border-radius: 16px;
-      background: rgba(4, 18, 12, 0.64);
+      background: rgba(4, 18, 12, 0.68);
       backdrop-filter: blur(5px);
-      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      border: 1.5px solid rgba(255, 255, 255, 0.14);
       transition: box-shadow 0.25s, border-color 0.25s, background 0.25s, transform 0.25s;
       z-index: 6;
     }
 
     .spots-ring.online-9 .spot-slot {
-      min-width: 104px;
-      max-width: 162px;
-      padding: 4px 6px;
+      min-width: 122px;
+      max-width: 215px;
+      padding: 5px 8px;
       border-radius: 14px;
     }
 
@@ -1072,16 +1072,16 @@
     .spot-owner-pill {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      font-size: 0.86rem;
+      gap: 7px;
+      font-size: 0.9rem;
       font-weight: 800;
       color: var(--text-main);
-      background: rgba(0, 0, 0, 0.68);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      padding: 3px 10px 3px 4px;
+      background: rgba(0, 0, 0, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      padding: 4px 11px 4px 4px;
       border-radius: 999px;
       cursor: pointer;
-      max-width: 175px;
+      max-width: 225px;
       transition: border-color 0.15s, background 0.15s;
     }
 
@@ -1092,18 +1092,345 @@
     }
 
     .spot-owner-pill img {
-      width: 26px;
-      height: 26px;
+      width: 31px;
+      height: 31px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--gold);
+      flex-shrink: 0;
+    }
+
+    .spot-owner-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      min-width: 0;
+      line-height: 1.15;
+    }
+
+    .spot-owner-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 155px;
+    }
+
+    .spot-owner-balance {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--gold-bright);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .player-balance-tag {
+      font-size: 0.74rem;
+      font-weight: 800;
+      color: var(--gold-bright);
+      background: rgba(212, 175, 55, 0.16);
+      border: 1px solid rgba(212, 175, 55, 0.42);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    /* COLLAPSIBLE CHAT WIDGET (SINGLE BUTTON WHEN CLOSED) */
+    .chat-fab-btn {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      z-index: 4500;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: linear-gradient(135deg, #134e35, #09261a);
+      border: 1.5px solid var(--gold);
+      color: var(--gold-bright);
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7), 0 0 18px rgba(212, 175, 55, 0.25);
+      transition: transform 0.18s, box-shadow 0.18s, background 0.18s;
+    }
+
+    .chat-fab-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.8), 0 0 24px rgba(212, 175, 55, 0.4);
+    }
+
+    .chat-fab-btn.hidden-when-open {
+      display: none;
+    }
+
+    .chat-unread-badge {
+      background: #e74c3c;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 900;
+      padding: 1px 7px;
+      border-radius: 999px;
+      border: 1px solid #fff;
+      min-width: 20px;
+      text-align: center;
+      animation: popBadge 0.25s ease-out;
+    }
+
+    .chat-panel-window {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      z-index: 4600;
+      width: 350px;
+      max-width: calc(100vw - 24px);
+      height: 440px;
+      max-height: 72vh;
+      background: linear-gradient(165deg, rgba(10, 31, 22, 0.98), rgba(5, 16, 11, 0.99));
+      border: 1.5px solid var(--gold);
+      border-radius: 18px;
+      box-shadow: 0 22px 55px rgba(0, 0, 0, 0.85), 0 0 28px rgba(212, 175, 55, 0.22);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      animation: fadeSlideUp 0.2s ease-out;
+    }
+
+    .chat-panel-window.open {
+      display: flex;
+    }
+
+    .chat-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: rgba(212, 175, 55, 0.14);
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--gold-bright);
+      font-weight: 800;
+      font-size: 0.88rem;
+    }
+
+    .chat-collapse-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--text-main);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+
+    .chat-collapse-btn:hover {
+      background: var(--loss);
+      border-color: var(--loss);
+      color: #fff;
+    }
+
+    .chat-messages-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      scroll-behavior: smooth;
+    }
+
+    .chat-empty-hint {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      margin: auto 0;
+      padding: 14px;
+      line-height: 1.45;
+    }
+
+    .chat-msg-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      max-width: 100%;
+    }
+
+    .chat-msg-item.mine {
+      flex-direction: row-reverse;
+    }
+
+    .chat-msg-avatar {
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       object-fit: cover;
       border: 1.5px solid var(--gold);
       flex-shrink: 0;
+      cursor: pointer;
+      background: #0d2b1e;
     }
 
-    .spot-owner-pill span {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    .chat-msg-bubble {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 7px 10px;
+      max-width: 255px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      word-break: break-word;
+    }
+
+    .chat-msg-item.mine .chat-msg-bubble {
+      background: rgba(212, 175, 55, 0.18);
+      border-color: rgba(212, 175, 55, 0.42);
+    }
+
+    .chat-msg-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: var(--gold-bright);
+    }
+
+    .chat-msg-time {
+      font-size: 0.62rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .chat-msg-text {
+      font-size: 0.83rem;
+      color: var(--text-main);
+      line-height: 1.38;
+      white-space: pre-wrap;
+    }
+
+    .chat-msg-img {
+      max-width: 100%;
+      max-height: 185px;
+      border-radius: 10px;
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      object-fit: contain;
+      background: rgba(0, 0, 0, 0.4);
+      cursor: zoom-in;
+      margin-top: 2px;
+    }
+
+    .chat-staged-bar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 10px;
+      background: rgba(0, 0, 0, 0.55);
+      border-top: 1px solid rgba(212, 175, 55, 0.25);
+    }
+
+    .chat-staged-bar.active {
+      display: flex;
+    }
+
+    .chat-staged-thumb {
+      height: 44px;
+      max-width: 120px;
+      border-radius: 8px;
+      border: 1px solid var(--gold);
+      object-fit: cover;
+    }
+
+    .chat-input-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      background: rgba(4, 14, 9, 0.95);
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .chat-icon-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: var(--gold-bright);
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+
+    .chat-icon-btn:hover {
+      background: rgba(212, 175, 55, 0.22);
+      border-color: var(--gold);
+    }
+
+    .chat-text-input {
+      flex: 1;
+      min-width: 0;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      border-radius: 10px;
+      padding: 7px 10px;
+      color: #fff;
+      font-size: 0.83rem;
+      outline: none;
+    }
+
+    .chat-text-input:focus {
+      border-color: var(--gold-bright);
+    }
+
+    .chat-send-btn {
+      background: linear-gradient(135deg, #f0cf65, #c89d28);
+      color: #091710;
+      border: none;
+      height: 34px;
+      padding: 0 12px;
+      border-radius: 10px;
+      font-weight: 900;
+      font-size: 0.84rem;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* FULLSCREEN IMAGE LIGHTBOX FOR CHAT IMAGES */
+    .image-lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 8, 5, 0.92);
+      backdrop-filter: blur(8px);
+      z-index: 9500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      cursor: zoom-out;
+    }
+
+    .image-lightbox-overlay.active {
+      display: flex;
+    }
+
+    .image-lightbox-overlay img {
+      max-width: 94vw;
+      max-height: 90vh;
+      border-radius: 14px;
+      border: 2px solid var(--gold);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
     }
 
     .spot-ready-dot {
@@ -2339,6 +2666,33 @@
 </head>
 <body>
 
+  <!-- OPTIONAL PASSWORD LOCK OVERLAY -->
+  <div class="lock-overlay" id="lock-overlay">
+    <div class="lock-card">
+      <img id="lock-avatar-img" class="lock-avatar" src="" alt="Avatar" />
+      <h3 style="color:var(--gold-bright);" id="lock-player-name">Perfil Bloqueado</h3>
+      <p style="font-size:0.84rem; color:var(--text-muted);">Introduce tu contraseña para acceder a tu perfil y banca.</p>
+      <input type="password" id="unlock-password-input" class="styled-input" placeholder="Tu contraseña" />
+      <button class="primary-cta" id="btn-unlock-profile" style="width:100%;">Desbloquear</button>
+      <span id="unlock-error" style="font-size:0.78rem; color:#ff8a80; min-height:18px;"></span>
+    </div>
+  </div>
+
+  <!-- PLAYER PROFILE MODAL (CLICK ON ANY PLAYER TO VIEW LARGE PHOTO & DETAILS) -->
+  <div class="player-modal-overlay" id="player-profile-modal">
+    <div class="player-modal-card">
+      <button type="button" class="modal-close-x" id="btn-close-player-modal" title="Cerrar">×</button>
+      <div class="player-modal-avatar-wrap">
+        <img id="modal-player-avatar" class="player-modal-avatar" src="" alt="Foto del jugador" />
+      </div>
+      <div class="player-modal-name" id="modal-player-name">Jugador</div>
+      <div class="player-modal-badges" id="modal-player-badges"></div>
+      <div class="player-modal-stats" id="modal-player-stats"></div>
+      <div id="modal-player-actions" style="width:100%; display:flex; flex-direction:column; gap:8px; margin-top:4px;"></div>
+    </div>
+  </div>
+
+
   <header>
     <div class="brand">
       <img src="./favicon.svg" alt="Icono" />
@@ -2470,16 +2824,28 @@
   <section id="profile-view" class="view">
     <div class="subpage-container"><div class="card-panel">
       <h2>Personalizar Perfil</h2>
-      <p>Elige tu nombre y tu avatar; aparecerán en la mesa.</p>
+      <p>Configura tu nombre, tu foto y tu contraseña. Se verán en la mesa, en el chat y al hacer clic sobre tu avatar.</p>
       <div class="profile-editor-grid">
         <div class="avatar-column">
-          <img id="profile-preview-img" class="avatar-preview-large" src="" alt="Avatar" />
+          <img id="profile-preview-img" class="avatar-preview-large" src="" alt="Foto de perfil" />
+          <input type="file" id="profile-photo-input" accept="image/*" style="display:none;" />
+          <button class="mini-btn gold-outline" id="btn-upload-photo" style="width:100%;">Subir foto</button>
+          <button class="mini-btn" id="btn-remove-photo" style="width:100%;">Quitar foto</button>
+          <span style="font-size:.7rem;color:var(--text-muted);">O elige un avatar rápido:</span>
           <div class="preset-avatars-row" id="preset-avatars-row"></div>
         </div>
         <div class="form-fields-col">
           <div class="field-group"><label for="profile-name-input">Nombre de jugador</label>
-            <input type="text" id="profile-name-input" class="styled-input" maxlength="18" placeholder="Ej. Alex Royale" /></div>
-          <div style="display:flex;gap:10px;margin-top:6px;"><button class="primary-cta" id="btn-save-profile">Guardar Perfil</button></div>
+            <input type="text" id="profile-name-input" class="styled-input" placeholder="Ej. Alex Royale" /></div>
+          <div class="field-group"><label for="profile-password-input">Contraseña del perfil <span id="password-status-badge" style="font-weight:400;color:var(--text-muted);">(Opcional)</span></label>
+            <div class="password-row"><input type="password" id="profile-password-input" class="styled-input" placeholder="Escribe una nueva contraseña..." autocomplete="new-password" />
+              <button type="button" class="mini-btn" id="btn-toggle-pass-vis">Mostrar</button></div></div>
+          <label class="toggle-keep"><input type="checkbox" id="profile-require-lock" /> Pedir contraseña al abrir la aplicación</label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
+            <button class="primary-cta" id="btn-save-profile">Guardar Perfil</button>
+            <button class="mini-btn" id="btn-lock-now" style="display:none;">Bloquear ahora</button>
+            <button class="mini-btn" id="btn-clear-password" style="display:none;color:#ff9c92;">Quitar contraseña</button>
+          </div>
           <div class="status-toast" id="profile-feedback"></div>
         </div>
       </div>
@@ -2523,13 +2889,48 @@
     </div>
   </section>
 
+  <!-- FULLSCREEN IMAGE LIGHTBOX -->
+  <div class="image-lightbox-overlay" id="image-lightbox-overlay">
+    <img id="image-lightbox-img" src="" alt="Imagen ampliada" />
+  </div>
+
+  <!-- COLLAPSIBLE CHAT WIDGET (SINGLE BUTTON WHEN CLOSED) -->
+  <button type="button" class="chat-fab-btn" id="btn-toggle-chat" title="Desplegar chat de texto e imágenes">
+    💬 <span>Chat</span>
+    <span class="chat-unread-badge" id="chat-unread-badge" style="display:none;">0</span>
+  </button>
+
+  <aside class="chat-panel-window" id="chat-panel-window" aria-label="Chat de sala">
+    <div class="chat-panel-header">
+      <span>💬 Chat de la Mesa</span>
+      <button type="button" class="chat-collapse-btn" id="btn-collapse-chat" title="Minimizar chat">−</button>
+    </div>
+    <div class="chat-messages-list" id="chat-messages-list">
+      <div class="chat-empty-hint">Envía mensajes o imágenes (también puedes pegar con Ctrl+V).</div>
+    </div>
+    <div class="chat-staged-bar" id="chat-staged-bar">
+      <img id="chat-staged-thumb" class="chat-staged-thumb" src="" alt="Vista previa" />
+      <span style="font-size:0.74rem; color:var(--gold-bright); font-weight:700; flex:1;">Imagen lista para enviar</span>
+      <button type="button" class="mini-btn" id="btn-clear-staged-img" style="padding:3px 8px; color:#ff9c92;">✕</button>
+    </div>
+    <div class="chat-input-bar">
+      <input type="file" id="chat-image-input" accept="image/*" style="display:none;" />
+      <button type="button" class="chat-icon-btn" id="btn-attach-chat-img" title="Adjuntar imagen">🖼️</button>
+      <input type="text" id="chat-text-input" class="chat-text-input" placeholder="Escribe o pega imagen..." autocomplete="off" />
+      <button type="button" class="chat-send-btn" id="btn-send-chat" title="Enviar mensaje">➤</button>
+    </div>
+  </aside>
+
 <script>
 (() => {
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const fmt = n => Math.round(n).toLocaleString('es-ES') + ' €';
   const avatar = (sym, a, b, f) => 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${a}"/><stop offset="100%" stop-color="${b}"/></linearGradient></defs><circle cx="50" cy="50" r="50" fill="url(#g)"/><text x="50" y="64" text-anchor="middle" font-family="Georgia,serif" font-weight="bold" font-size="46" fill="${f}">${sym}</text></svg>`);
+  const PHOTOS = {}; let myId = 'me';
   const AV = [avatar('♠', '#155d3e', '#08291b', '#f6df8d'), avatar('♦', '#7b1e26', '#2b090d', '#ffd166'), avatar('♣', '#1b3b5a', '#0b1929', '#90e0ef'), avatar('♥', '#6a1b4d', '#24081a', '#ffafcc'), avatar('♛', '#8c6218', '#3b2706', '#fff3b0'), avatar('★', '#2d3a3a', '#111717', '#d4af37')];
+  const avSrc = (id, av) => PHOTOS[id] || AV[av] || AV[0];
+  const clean = s => String(s || 'Jugador').trim().slice(0, 24) || 'Jugador';
   const HN = ['Carta alta', 'Pareja', 'Doble pareja', 'Trío', 'Escalera', 'Color', 'Full house', 'Póker', 'Escalera de color'];
   const PH = { wait: 'ESPERANDO', pre: 'PRE-FLOP', flop: 'FLOP', turn: 'TURN', river: 'RIVER', show: 'SHOWDOWN', over: 'FIN DE MANO' };
   const PLAY = ['pre', 'flop', 'turn', 'river'];
@@ -2555,8 +2956,9 @@
   };
 
   /* ---------- Estado persistente ---------- */
-  let S = { balance: 1000, stats: { played: 0, won: 0, net: 0 }, sound: true, sec: 30, blind: 20, profile: { name: 'Jugador', av: 0 } };
+  let S = { balance: 1000, stats: { played: 0, won: 0, net: 0 }, sound: true, sec: 30, blind: 20, profile: { name: 'Jugador', av: 0, photo: '', pass: '', lock: false } };
   try { const r = JSON.parse(localStorage.getItem('th_state_v1')); if (r) S = Object.assign(S, r); } catch (e) {}
+  S.profile = Object.assign({ name: 'Jugador', av: 0, photo: '', pass: '', lock: false }, S.profile);
   const save = () => { try { localStorage.setItem('th_state_v1', JSON.stringify(S)); } catch (e) {} };
 
   /* ---------- Evaluador de manos ---------- */
@@ -2595,13 +2997,22 @@
 
   /* ---------- Motor (solo el líder / solitario) ---------- */
   let T = null, V = null, role = 'solo', mySeat = 2, tm = null, nxt = null, peer = null, hostConn = null, conns = {};
-  const mkSeat = (i, id, name, av, stack, bot) => ({ i, id, name, av, stack, cards: [], bet: 0, tot: 0, folded: false, allin: false, acted: false, bot: !!bot, in: false, last: '', hs: '', gone: false });
-  const mkTable = (n) => ({ n, seats: Array(n).fill(null), btn: -1, sb: -1, bb: -1, phase: 'wait', board: [], deck: [], cur: 0, minRaise: 20, turn: -1, deadline: 0, blind: S.blind, sec: S.sec, hand: 0, show: false, res: null, nextAt: 0 });
+  const mkSeat = (i, id, name, av, stack, bot) => ({ i, id, name, av, stack, cards: [], bet: 0, tot: 0, folded: false, allin: false, acted: false, bot: !!bot, in: false, last: '', hs: '', gone: false, leave: false });
+  const mkTable = (n) => ({ n, seats: Array(n).fill(null), btn: -1, sb: -1, bb: -1, phase: 'wait', board: [], deck: [], cur: 0, minRaise: 20, turn: -1, deadline: 0, blind: S.blind, sec: S.sec, hand: 0, show: false, res: null, nextAt: 0, players: {} });
+  const setMyPhoto = () => { if (S.profile.photo) PHOTOS[myId] = S.profile.photo; else delete PHOTOS[myId]; };
+  function addPlayer(id, name, av, stack, bot, seat) { T.players[id] = { id, name, av, stack, bot: !!bot, seat: -1 }; if (seat >= 0) sit(id, seat); }
+  function sit(id, i) {
+    const p = T.players[id]; if (!p || p.seat >= 0 || i < 0 || i >= T.n || T.seats[i]) return false;
+    if (p.stack <= 0) p.stack = 1000; T.seats[i] = mkSeat(i, id, p.name, p.av, p.stack, p.bot); p.seat = i; return true;
+  }
+  function stand(id) {
+    const p = T.players[id]; if (!p || p.seat < 0) return; const s = T.seats[p.seat];
+    if (T.phase === 'wait' || T.phase === 'over' || !s.in) { p.stack = s.stack; T.seats[p.seat] = null; p.seat = -1; } else s.leave = !s.leave;
+  }
   function initSolo() {
-    clearT(); clearTimeout(nxt); role = 'solo'; mySeat = 2; T = mkTable(3);
-    T.seats[0] = mkSeat(0, 'b1', 'Marta', 3, 1000, true); T.seats[1] = mkSeat(1, 'b2', 'Dani', 4, 1000, true);
-    T.seats[2] = mkSeat(2, 'me', S.profile.name, S.profile.av, S.balance || 1000);
-    sync();
+    clearT(); clearTimeout(nxt); role = 'solo'; myId = 'me'; T = mkTable(3);
+    addPlayer('b1', 'Marta', 3, 1000, true, 0); addPlayer('b2', 'Dani', 4, 1000, true, 1); addPlayer('me', S.profile.name, S.profile.av, S.balance || 1000, false, 2);
+    setMyPhoto(); sync();
   }
   const clearT = () => { clearTimeout(tm); tm = null; };
   const pot = () => T.seats.reduce((a, s) => a + (s ? s.tot : 0), 0);
@@ -2612,7 +3023,7 @@
 
   function startHand() {
     clearT(); clearTimeout(nxt);
-    T.seats.forEach((s, i) => { if (s && s.gone) T.seats[i] = null; });
+    T.seats.forEach((s, i) => { if (!s) return; if (s.gone) T.seats[i] = null; else if (s.leave) { const p = T.players[s.id]; if (p) { p.stack = s.stack; p.seat = -1; } T.seats[i] = null; } });
     T.seats.forEach(s => { if (s && s.stack <= 0) s.stack = 1000; });
     T.blind = +$('blind-select').value; T.sec = +$('turn-duration-select').value;
     const el = T.seats.filter(s => s && s.stack > 0);
@@ -2630,6 +3041,7 @@
 
   function setTurn() {
     clearT(); const s = T.seats[T.turn]; T.deadline = Date.now() + T.sec * 1000;
+    if (s.leave || s.gone) { tm = setTimeout(() => doAct(s.i, T.cur > s.bet ? 'fold' : 'check'), 400); return; }
     if (s.bot) tm = setTimeout(() => botAct(s), 800 + Math.random() * 1000);
     else tm = setTimeout(() => doAct(s.i, T.cur > s.bet ? 'fold' : 'check'), T.sec * 1000 + 300);
   }
@@ -2707,22 +3119,26 @@
   }
 
   /* ---------- Sincronización ---------- */
+  const sOf = id => { const p = T.players[id]; return p && p.seat >= 0 ? p.seat : -1; };
+  const playerList = () => Object.values(T.players).map(p => ({ id: p.id, name: p.name, av: p.av, seat: p.seat, stack: p.seat >= 0 && T.seats[p.seat] ? T.seats[p.seat].stack : p.stack }));
+  const bc = (m, except) => Object.values(conns).forEach(c => { if (c.open && c.peer !== except) { try { c.send(m); } catch (e) {} } });
   const mask = (forI) => ({
     n: T.n, btn: T.btn, sb: T.sb, bb: T.bb, phase: T.phase, board: T.board, cur: T.cur, minRaise: T.minRaise, turn: T.turn, blind: T.blind, hand: T.hand, show: T.show, res: T.res, sec: T.sec,
     dl: Math.max(0, T.deadline - Date.now()), nx: Math.max(0, T.nextAt - Date.now()),
-    seats: T.seats.map(s => s && { i: s.i, name: s.name, av: s.av, stack: s.stack, bet: s.bet, tot: s.tot, folded: s.folded, allin: s.allin, in: s.in, last: s.last, hs: s.hs, bot: s.bot,
+    players: playerList(),
+    seats: T.seats.map(s => s && { i: s.i, id: s.id, leave: s.leave, gone: s.gone, name: s.name, av: s.av, stack: s.stack, bet: s.bet, tot: s.tot, folded: s.folded, allin: s.allin, in: s.in, last: s.last, hs: s.hs, bot: s.bot,
       cards: (s.i === forI || (T.show && !s.folded)) ? s.cards : s.cards.map(() => null) })
   });
   function sync() {
     if (role === 'guest') return;
-    V = mask(mySeat); V.local = Date.now() + V.dl; V.nlocal = Date.now() + V.nx;
-    Object.values(conns).forEach(c => { if (c.open) c.send({ t: 'state', you: c.seat, V: mask(c.seat) }); });
+    mySeat = sOf('me'); V = mask(mySeat); V.local = Date.now() + V.dl; V.nlocal = Date.now() + V.nx;
+    Object.values(conns).forEach(c => { if (c.open) c.send({ t: 'state', you: sOf(c.peer), V: mask(sOf(c.peer)) }); });
     onState(); render();
   }
   let lastCounted = 0, lastTurnKey = '';
   function onState() {
-    const me = V.seats[mySeat];
-    if (me) { S.balance = me.stack; }
+    const me = V.seats[mySeat], mpl = V.players.find(p => p.id === myId);
+    if (mpl) S.balance = mpl.stack;
     if (V.phase === 'over' && V.res && lastCounted !== V.hand && me && me.in) {
       lastCounted = V.hand; const net = V.res.net[mySeat] || 0;
       S.stats.played++; S.stats.net += net; if (net > 0) { S.stats.won++; sfx.win(); }
@@ -2734,8 +3150,8 @@
   const cardHTML = (c, fresh) => c ? `<div class="card ${c.color} ${fresh ? 'card-new' : ''}"><div class="card-corner"><span>${c.r}</span><span>${c.s}</span></div><div class="card-center">${c.s}</div><div class="card-corner bottom"><span>${c.r}</span><span>${c.s}</span></div></div>` : '<div class="card hidden-card"></div>';
   const chips = x => { const d = [500, 100, 50, 25, 10, 5, 1], r = []; let m = Math.floor(x); for (const v of d) while (m >= v && r.length < 8) { r.push(v); m -= v; } if (!r.length && x > 0) r.push(1); return r; };
   function posStyle(i) {
-    const N = V.n, p = (i - (mySeat < 0 ? 0 : mySeat) + (N === 3 ? 2 : 6) + N * 2) % N;
-    const deg = N === 3 ? [184, -4, 90][p] : 210 + p * 40, rad = deg * Math.PI / 180, rx = N === 3 ? 36 : 40.5, ry = N === 3 ? 34 : 34.5;
+    const N = V.n, p = (i - (mySeat < 0 ? (N === 3 ? 2 : 6) : mySeat) + (N === 3 ? 2 : 6) + N * 2) % N;
+    const deg = N === 3 ? [184, -4, 90][p] : 210 + p * 40, rad = deg * Math.PI / 180, rx = N === 3 ? 40.5 : 43.2, ry = N === 3 ? 34.5 : 35.5;
     return `--spot-left:${(50 + rx * Math.cos(rad)).toFixed(2)}%; --spot-top:${(52 + ry * Math.sin(rad)).toFixed(2)}%;`;
   }
   let prevBoard = 0, lastHandR = 0, raiseVal = 0, raiseKey = '';
@@ -2748,36 +3164,38 @@
     $('dealer-center-hub').classList.toggle('dealer-active', PLAY.includes(V.phase));
     prevBoard = V.board.length;
     const grid = $('spots-grid'); grid.classList.toggle('online-9', V.n === 9);
+    const online = V.n === 9, iSeated = mySeat >= 0;
     grid.innerHTML = V.seats.map((s, i) => {
       const st = posStyle(i);
-      if (!s) return `<div class="spot-slot" style="${st}"><span class="open-spot-hint" style="opacity:.4">Asiento libre</span></div>`;
-      const mine = i === mySeat, isTurn = V.turn === i && PLAY.includes(V.phase), won = V.res && V.res.won[i] > 0;
+      if (!s) return `<div class="spot-slot" style="${st}">${online && !iSeated ? `<button class="open-spot-btn" data-action="sit" data-idx="${i}" title="Sentarme en el asiento #${i + 1}">+</button><span class="open-spot-hint">Asiento #${i + 1}</span>` : '<span class="open-spot-hint" style="opacity:.4">Asiento libre</span>'}</div>`;
+      const mine = s.id === myId, isTurn = V.turn === i && PLAY.includes(V.phase), won = V.res && V.res.won[i] > 0;
       const net = V.res && V.res.net[i], cls = V.phase === 'over' && s.in ? (net > 0 ? 'outcome-win-slot' : net < 0 ? 'outcome-loss-slot' : 'outcome-push-slot') : '';
       const rem = isTurn ? Math.max(0, (V.local - Date.now()) / 1000) : 0;
       const badges = (V.btn === i ? '<span class="th-badge">D</span>' : '') + (V.sb === i && V.phase !== 'wait' ? '<span class="th-badge blind">SB</span>' : '') + (V.bb === i && V.phase !== 'wait' ? '<span class="th-badge blind">BB</span>' : '');
       const cardsHtml = s.in && s.cards.length ? s.cards.map(c => cardHTML(c, fresh)).join('') : '';
       const label = V.phase === 'over' && s.in ? (V.res.fold && won ? 'Gana ' + fmt(V.res.won[i]) : (s.hs ? s.hs + (won ? ' · +' + fmt(V.res.won[i]) : '') : s.last)) : (s.in ? s.last : (V.phase === 'wait' ? '' : 'Esperando'));
-      return `<div class="spot-slot ${mine ? 'mine-spot' : 'other-player-spot'} ${isTurn ? 'active-turn' : ''} ${cls} ${s.folded ? 'th-fold' : ''}" style="${st}">
+      return `<div class="spot-slot ${mine ? 'mine-spot' : 'other-player-spot'} ${isTurn ? 'active-turn' : ''} ${cls} ${s.folded || s.gone ? 'th-fold' : ''}" style="${st}">
         ${isTurn ? `<div class="spot-timer-pill ${rem <= 4 ? 'urgent' : ''}" data-spot-timer="${i}">⏱ ${Math.ceil(rem)}s</div>` : ''}
         <div class="cards-row">${cardsHtml}</div>
         <div class="bet-circle">${s.bet > 0 ? `<div class="chip-stack">${chips(s.bet).map((v, k) => `<div class="mini-chip chip-c-${[1, 5, 10, 25, 50, 100, 500].filter(x => x <= v).pop()}" style="bottom:${k * 3}px;">${v}</div>`).join('')}</div>` : '<span class="bet-circle-placeholder"></span>'}</div>
         <div class="bet-amount-tag">${s.bet > 0 ? fmt(s.bet) : ''}</div>
         <div class="th-last ${won && V.phase === 'over' ? 'win' : ''}">${esc(label || '')}</div>
-        <div class="spot-top-bar"><div class="spot-owner-pill"><img src="${AV[s.av] || AV[0]}" alt="" /><span>${esc(s.name)}</span>${badges}</div></div>
-        <div class="th-stack">${s.allin ? 'ALL-IN' : fmt(s.stack)}</div></div>`;
+        <div class="spot-top-bar"><div class="spot-owner-pill" data-action="view-player" data-player-id="${esc(s.id)}"><img src="${avSrc(s.id, s.av)}" alt="" /><div class="spot-owner-info"><span class="spot-owner-name">${esc(s.name)}${badges}</span><span class="spot-owner-balance">💰 ${fmt(s.stack)}</span></div></div>
+          ${online && mine ? `<button class="close-spot-btn" data-action="stand" title="${s.leave ? 'Cancelar: seguir sentado' : 'Levantarme (ser espectador)'}">×</button>` : ''}</div>
+        <div class="th-stack">${s.allin ? 'ALL-IN' : (s.leave ? 'Se levantará' : '')}</div></div>`;
     }).join('');
     lastHandR = V.hand;
 
     $('header-table-bet').textContent = fmt(me ? me.tot : 0); $('header-balance').textContent = fmt(me ? me.stack : S.balance);
-    $('header-avatar').src = AV[S.profile.av]; $('header-player-name').textContent = S.profile.name;
+    $('header-avatar').src = avSrc(myId, S.profile.av); $('header-player-name').textContent = S.profile.name;
     const bc = $('betting-controls'), pc = $('play-controls'), sd = $('round-summary-dock');
     bc.style.display = V.phase === 'wait' ? '' : 'none'; pc.classList.toggle('active', PLAY.includes(V.phase)); sd.classList.toggle('active', V.phase === 'over');
     $('btn-deal').style.display = role === 'guest' ? 'none' : '';
-    $('mp-status-hint').textContent = role === 'guest' ? 'Esperando a que el líder reparta…' : (T && T.seats.filter(s => s).length < 2 ? 'Esperando jugadores…' : '');
+    $('mp-status-hint').textContent = (online && !iSeated) ? '👁 Espectador · pulsa + en un asiento para jugar' : (role === 'guest' ? 'Esperando a que el líder reparta…' : (V.seats.filter(s => s).length < 2 ? 'Esperando jugadores…' : ''));
     $('blind-select').disabled = $('turn-duration-select').disabled = role === 'guest';
     if (PLAY.includes(V.phase) && me) {
       const my = V.turn === mySeat, toCall = Math.min(V.cur - me.bet, me.stack), ts = V.seats[V.turn];
-      $('turn-avatar').src = ts ? AV[ts.av] || AV[0] : ''; $('turn-indicator').textContent = my ? '¡Es tu turno!' : 'Turno: ' + (ts ? ts.name : '…');
+      $('turn-avatar').src = ts ? avSrc(ts.id, ts.av) : ''; $('turn-indicator').textContent = my ? '¡Es tu turno!' : 'Turno: ' + (ts ? ts.name : '…');
       const minTo = Math.min(V.cur + V.minRaise, me.bet + me.stack), key = V.hand + V.phase + V.turn;
       if (key !== raiseKey) { raiseKey = key; raiseVal = minTo; if (my) sfx.turn(); }
       if (document.activeElement !== $('raise-input')) $('raise-input').value = raiseVal;
@@ -2798,7 +3216,7 @@
     $('stat-balance').textContent = fmt(S.balance); $('stat-net').textContent = (S.stats.net >= 0 ? '+' : '') + fmt(S.stats.net);
     $('stat-played').textContent = S.stats.played; $('stat-won').textContent = S.stats.won;
     $('btn-toggle-sound').textContent = S.sound ? '🔊' : '🔇';
-    $('mp-players-list').innerHTML = V.seats.filter(s => s).map(s => `<div class="th-pl"><img src="${AV[s.av] || AV[0]}" alt=""/><strong>${esc(s.name)}</strong><span style="color:var(--text-muted)">${fmt(s.stack)}</span></div>`).join('');
+    $('mp-players-list').innerHTML = V.players.map(p => `<div class="th-pl" data-action="view-player" data-player-id="${esc(p.id)}" style="cursor:pointer"><img src="${avSrc(p.id, p.av)}" alt=""/><strong>${esc(p.name)}</strong><span class="player-balance-tag">💰 ${fmt(p.stack)}</span><span class="th-chip">${p.seat >= 0 ? 'Asiento #' + (p.seat + 1) : '👁 Espectador'}</span></div>`).join('');
   }
 
   setInterval(() => {
@@ -2835,80 +3253,203 @@
   function switchView(id) { document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === id)); document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.view === id)); }
   document.querySelectorAll('.nav-tab').forEach(t => t.onclick = () => switchView(t.dataset.view));
   $('header-profile-btn').onclick = () => switchView('profile-view');
-  let selAv = S.profile.av;
+  let selAv = S.profile.av, selPhoto = S.profile.photo;
+  const hash = s => { let h = 5381; for (const c of s) h = ((h << 5) + h + c.charCodeAt(0)) | 0; return String(h); };
   function drawProfile() {
-    $('profile-name-input').value = S.profile.name; $('profile-preview-img').src = AV[selAv];
-    $('preset-avatars-row').innerHTML = AV.map((a, i) => `<img src="${a}" data-i="${i}" style="width:44px;height:44px;border-radius:50%;cursor:pointer;border:2px solid ${i === selAv ? 'var(--gold-bright)' : 'transparent'}" />`).join('');
-    document.querySelectorAll('#preset-avatars-row img').forEach(im => im.onclick = () => { selAv = +im.dataset.i; drawProfile(); });
+    $('profile-name-input').value = S.profile.name; $('profile-preview-img').src = selPhoto || AV[selAv];
+    $('preset-avatars-row').innerHTML = AV.map((a, i) => `<img src="${a}" data-i="${i}" style="width:44px;height:44px;border-radius:50%;cursor:pointer;border:2px solid ${!selPhoto && i === selAv ? 'var(--gold-bright)' : 'transparent'}" />`).join('');
+    document.querySelectorAll('#preset-avatars-row img').forEach(im => im.onclick = () => { selAv = +im.dataset.i; selPhoto = ''; drawProfile(); });
+    $('profile-require-lock').checked = !!S.profile.lock; const hp = !!S.profile.pass;
+    $('password-status-badge').textContent = hp ? '(Activa)' : '(Opcional)'; $('btn-lock-now').style.display = $('btn-clear-password').style.display = hp ? '' : 'none';
+  }
+  $('btn-upload-photo').onclick = () => $('profile-photo-input').click();
+  $('profile-photo-input').onchange = e => {
+    const f = e.target.files && e.target.files[0]; if (!f) return; const r = new FileReader();
+    r.onload = ev => { const im = new Image(); im.onload = () => { const m = Math.min(im.width, im.height), c = document.createElement('canvas'); c.width = c.height = 160;
+      c.getContext('2d').drawImage(im, (im.width - m) / 2, (im.height - m) / 2, m, m, 0, 0, 160, 160); selPhoto = c.toDataURL('image/jpeg', .8); drawProfile(); }; im.src = ev.target.result; };
+    r.readAsDataURL(f); e.target.value = '';
+  };
+  $('btn-remove-photo').onclick = () => { selPhoto = ''; drawProfile(); };
+  $('btn-toggle-pass-vis').onclick = () => { const i = $('profile-password-input'); i.type = i.type === 'password' ? 'text' : 'password'; $('btn-toggle-pass-vis').textContent = i.type === 'password' ? 'Mostrar' : 'Ocultar'; };
+  function profileUpdate() {
+    const m = { name: S.profile.name, av: S.profile.av, photo: S.profile.photo }; setMyPhoto();
+    if (role === 'guest') hostConn && hostConn.send({ t: 'prof', ...m }); else if (T) updProfile('me', m);
   }
   $('btn-save-profile').onclick = () => {
-    S.profile.name = ($('profile-name-input').value.trim() || 'Jugador').slice(0, 18); S.profile.av = selAv; save();
-    if (role === 'guest') hostConn && hostConn.send({ t: 'prof', name: S.profile.name, av: S.profile.av });
-    else if (T && T.seats[mySeat]) { T.seats[mySeat].name = S.profile.name; T.seats[mySeat].av = S.profile.av; sync(); }
-    $('profile-feedback').textContent = 'Perfil guardado ✔'; render();
+    S.profile.name = clean($('profile-name-input').value); S.profile.av = selAv; S.profile.photo = selPhoto;
+    const pw = $('profile-password-input').value; if (pw) S.profile.pass = hash(pw); $('profile-password-input').value = '';
+    S.profile.lock = $('profile-require-lock').checked && !!S.profile.pass; save(); profileUpdate(); drawProfile();
+    $('profile-feedback').textContent = 'Perfil guardado ✔'; if (V) render();
   };
+  $('btn-clear-password').onclick = () => { S.profile.pass = ''; S.profile.lock = false; save(); drawProfile(); $('profile-feedback').textContent = 'Contraseña eliminada'; };
+  const showLock = () => { $('lock-avatar-img').src = S.profile.photo || AV[S.profile.av]; $('lock-player-name').textContent = S.profile.name; $('lock-overlay').classList.add('active'); };
+  $('btn-lock-now').onclick = showLock;
+  const unlock = () => { if (hash($('unlock-password-input').value) === S.profile.pass) { $('lock-overlay').classList.remove('active'); $('unlock-password-input').value = ''; $('unlock-error').textContent = ''; } else $('unlock-error').textContent = 'Contraseña incorrecta'; };
+  $('btn-unlock-profile').onclick = unlock; $('unlock-password-input').onkeydown = e => { if (e.key === 'Enter') unlock(); };
   $('reset-confirm-input').oninput = e => $('btn-confirm-reset').disabled = e.target.value.trim().toLowerCase() !== 'reiniciar';
   $('btn-confirm-reset').onclick = () => {
     S.balance = 1000; S.stats = { played: 0, won: 0, net: 0 }; save(); $('reset-confirm-input').value = ''; $('btn-confirm-reset').disabled = true;
-    if (role === 'solo') initSolo(); else if (role === 'host' && T.seats[mySeat]) { T.seats[mySeat].stack = 1000; sync(); } else render();
+    if (role === 'solo') initSolo(); else if (role === 'host') { const p = T.players.me; p.stack = 1000; if (T.seats[p.seat]) T.seats[p.seat].stack = 1000; sync(); } else toast('Sal de la sala online para reiniciar tus fichas.');
   };
 
   /* ---------- Multijugador P2P (PeerJS) ---------- */
   const toast = m => $('mp-feedback').textContent = m;
   function setMp(on) { $('mp-status-dot').classList.toggle('on', on); $('btn-leave-room').style.display = on ? '' : 'none'; $('mp-roster-box').style.display = on ? '' : 'none'; $('header-mode-subtitle').textContent = on ? 'Sala online · hasta 9 jugadores · No-Limit' : 'Mesa Circular · Sentido Horario · No-Limit'; }
   function leave(msg) {
-    try { peer && peer.destroy(); } catch (e) {} peer = null; hostConn = null; conns = {}; $('host-room-info').style.display = 'none'; setMp(false);
-    if (msg) toast(msg); V = null; initSolo();
+    try { peer && peer.destroy(); } catch (e) {} peer = null; hostConn = null; conns = {};
+    Object.keys(PHOTOS).forEach(k => delete PHOTOS[k]); $('host-room-info').style.display = 'none'; setMp(false);
+    if (msg) toast(msg); V = null; chatMsgs = []; renderChat(); initSolo();
   }
   $('btn-leave-room').onclick = () => leave('Has salido de la sala.');
+
+  function updProfile(id, m) {
+    const p = T.players[id]; if (!p) return;
+    p.name = clean(m.name); p.av = AV[m.av] ? m.av : 0; const s = T.seats[p.seat]; if (s) { s.name = p.name; s.av = p.av; }
+    if (m.photo === '') delete PHOTOS[id]; else if (typeof m.photo === 'string' && m.photo.startsWith('data:image/') && m.photo.length < 60000) PHOTOS[id] = m.photo;
+    bc({ t: 'photo', id, src: PHOTOS[id] || null }); sync();
+  }
+  function dropPlayer(id) {
+    delete conns[id]; if (!T) return; const p = T.players[id]; if (!p) return;
+    delete T.players[id]; delete PHOTOS[id]; bc({ t: 'photo', id, src: null });
+    if (p.seat >= 0) {
+      const s = T.seats[p.seat];
+      if (PLAY.includes(T.phase) && s.in) {
+        s.gone = true;
+        if (!s.folded) { if (T.turn === s.i) doAct(s.i, 'fold'); else { s.folded = true; s.last = 'Fold'; if (live().length === 1) proceed(); } }
+      } else if (T.phase === 'over' || T.phase === 'show') s.gone = true; else T.seats[p.seat] = null;
+    }
+    sync();
+  }
+  function kick(id) {
+    const c = conns[id]; if (c) { try { c.send({ t: 'kicked' }); } catch (e) {} setTimeout(() => { try { c.close(); } catch (e) {} }, 250); }
+    dropPlayer(id); toast('Jugador expulsado.');
+  }
+
   $('btn-create-room').onclick = () => {
     if (typeof Peer === 'undefined') return toast('No se pudo cargar PeerJS. Revisa tu conexión.');
     leave(); const code = 'TH-' + Math.floor(1000 + Math.random() * 9000);
     peer = new Peer('thr-' + code.toLowerCase());
     peer.on('error', e => toast('Error de sala: ' + e.type + (e.type === 'unavailable-id' ? ' (inténtalo de nuevo)' : '')));
     peer.on('open', () => {
-      clearT(); clearTimeout(nxt); role = 'host'; mySeat = 6; T = mkTable(9); T.seats[6] = mkSeat(6, 'me', S.profile.name, S.profile.av, S.balance || 1000);
-      $('host-code-text').textContent = code; $('host-room-info').style.display = 'flex'; setMp(true); toast('Sala creada. Comparte el código.'); sync();
+      clearT(); clearTimeout(nxt); role = 'host'; myId = 'me'; T = mkTable(9); addPlayer('me', S.profile.name, S.profile.av, S.balance || 1000, false, 6); setMyPhoto();
+      $('host-code-text').textContent = code; $('host-room-info').style.display = 'flex'; setMp(true); toast('Sala creada. Comparte el código; los invitados entran como espectadores y se sientan con “+”.'); sync();
     });
     peer.on('connection', c => {
       c.on('data', m => {
-        if (!m || !T) return;
+        if (!m || !T) return; const id = c.peer;
         if (m.t === 'join') {
-          let i = -1; for (let k = 1; k <= 9; k++) { const j = (6 + k) % 9; if (!T.seats[j]) { i = j; break; } }
-          if (i < 0) { c.send({ t: 'full' }); return; }
-          T.seats[i] = mkSeat(i, c.peer, String(m.name || 'Jugador').slice(0, 18), AV[m.av] ? m.av : 0, Math.max(+m.stack || 0, 0) || 1000);
-          c.seat = i; conns[c.peer] = c; c.send({ t: 'you', i }); toast((T.seats[i].name) + ' se ha unido.'); sync();
-        } else if (m.t === 'act' && c.seat != null) doAct(c.seat, m.a, m.amt);
-        else if (m.t === 'prof' && c.seat != null) { const s = T.seats[c.seat]; s.name = String(m.name || 'Jugador').slice(0, 18); s.av = AV[m.av] ? m.av : 0; sync(); }
+          if (Object.keys(T.players).length >= 14) { c.send({ t: 'full' }); return; }
+          conns[id] = c; addPlayer(id, clean(m.name), AV[m.av] ? m.av : 0, Math.max(+m.stack || 0, 0) || 1000, false, -1);
+          if (typeof m.photo === 'string' && m.photo.startsWith('data:image/') && m.photo.length < 60000) { PHOTOS[id] = m.photo; bc({ t: 'photo', id, src: m.photo }, id); }
+          c.send({ t: 'photos', map: PHOTOS }); c.send({ t: 'chat_hist', msgs: chatMsgs.slice(-30) });
+          toast(T.players[id].name + ' se ha unido como espectador.'); sync(); return;
+        }
+        const p = T.players[id]; if (!p) return;
+        if (m.t === 'act') { if (p.seat >= 0) doAct(p.seat, m.a, m.amt); }
+        else if (m.t === 'sit') { if (sit(id, +m.i)) sync(); }
+        else if (m.t === 'stand') { stand(id); sync(); }
+        else if (m.t === 'prof') updProfile(id, m);
+        else if (m.t === 'chat') addChat({ id: 'm' + Date.now() + Math.random().toString(36).slice(2, 6), sid: id, name: p.name, av: p.av, text: String(m.text || '').slice(0, 1000), img: (typeof m.img === 'string' && m.img.startsWith('data:image/') && m.img.length < 400000) ? m.img : '', ts: Date.now() }, true);
       });
-      c.on('close', () => {
-        delete conns[c.peer]; const s = T && T.seats[c.seat]; if (!s) return;
-        s.gone = true; if (PLAY.includes(T.phase) && s.in && !s.folded) { if (T.turn === s.i) doAct(s.i, 'fold'); else { s.folded = true; s.last = 'Fold'; if (live().length === 1) proceed(); } } else if (T.phase === 'wait' || T.phase === 'over') { /* se elimina en la próxima mano */ }
-        sync();
-      });
+      c.on('close', () => dropPlayer(c.peer));
     });
   };
   function join(code) {
     if (typeof Peer === 'undefined') return toast('No se pudo cargar PeerJS. Revisa tu conexión.');
     leave(); toast('Conectando…'); peer = new Peer();
-    peer.on('error', e => { toast('No se pudo conectar (' + e.type + ')'); });
-    peer.on('open', () => {
+    peer.on('error', e => toast('No se pudo conectar (' + e.type + ')'));
+    peer.on('open', id => {
       const c = peer.connect('thr-' + code.toLowerCase(), { reliable: true }); hostConn = c;
-      c.on('open', () => { clearT(); clearTimeout(nxt); role = 'guest'; T = null; mySeat = -1; setMp(true); c.send({ t: 'join', name: S.profile.name, av: S.profile.av, stack: S.balance }); toast('Conectado a ' + code.toUpperCase()); switchView('table-view'); });
+      c.on('open', () => {
+        clearT(); clearTimeout(nxt); role = 'guest'; T = null; mySeat = -1; myId = id; setMyPhoto(); setMp(true);
+        c.send({ t: 'join', name: S.profile.name, av: S.profile.av, photo: S.profile.photo, stack: S.balance }); toast('Conectado a ' + code.toUpperCase() + ' como espectador. Pulsa “+” en un asiento libre para jugar.'); switchView('table-view');
+      });
       c.on('data', m => {
-        if (m.t === 'you') mySeat = m.i;
+        if (!m) return;
+        if (m.t === 'state') { mySeat = m.you; V = m.V; V.local = Date.now() + V.dl; V.nlocal = Date.now() + V.nx; onState(); render(); }
+        else if (m.t === 'photos') { Object.assign(PHOTOS, m.map); setMyPhoto(); render(); }
+        else if (m.t === 'photo') { if (m.src) PHOTOS[m.id] = m.src; else if (m.id !== myId) delete PHOTOS[m.id]; render(); }
+        else if (m.t === 'chat_hist') { chatMsgs = m.msgs || []; renderChat(); }
+        else if (m.t === 'chat_msg') addChat(m.m, false);
+        else if (m.t === 'kicked') leave('Has sido expulsado de la sala.');
         else if (m.t === 'full') leave('La sala está llena.');
-        else if (m.t === 'state') { mySeat = m.you; V = m.V; V.local = Date.now() + V.dl; V.nlocal = Date.now() + V.nx; onState(); render(); }
       });
       c.on('close', () => leave('El líder cerró la sala.'));
     });
   }
   $('btn-join-room').onclick = () => { const c = $('mp-join-code').value.trim(); if (c) join(c); else toast('Introduce un código de sala.'); };
   $('btn-copy-code').onclick = () => { navigator.clipboard && navigator.clipboard.writeText($('host-code-text').textContent); toast('Código copiado'); };
-  $('btn-copy-link').onclick = () => { const u = location.origin + location.pathname + '?sala=' + $('host-code-text').textContent; navigator.clipboard && navigator.clipboard.writeText(u); toast('Enlace copiado'); };
+  $('btn-copy-link').onclick = () => { navigator.clipboard && navigator.clipboard.writeText(location.origin + location.pathname + '?sala=' + $('host-code-text').textContent); toast('Enlace copiado'); };
+
+  /* ---------- Chat con imágenes ---------- */
+  let chatMsgs = [], chatOpen = false, unread = 0, staged = '';
+  const ctime = ts => { try { return new Date(ts).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } };
+  function renderChat() {
+    const l = $('chat-messages-list'); if (!l) return;
+    if (!chatMsgs.length) { l.innerHTML = '<div class="chat-empty-hint">Envía mensajes o imágenes (también puedes pegar con Ctrl+V).</div>'; return; }
+    l.innerHTML = chatMsgs.map(m => `<div class="chat-msg-item ${m.sid === myId ? 'mine' : ''}"><img class="chat-msg-avatar" src="${avSrc(m.sid, m.av)}" alt="" data-action="view-player" data-player-id="${esc(m.sid)}" />
+      <div class="chat-msg-bubble"><div class="chat-msg-meta"><span>${esc(m.name)}</span><span class="chat-msg-time">${ctime(m.ts)}</span></div>
+      ${m.text ? `<div class="chat-msg-text">${esc(m.text)}</div>` : ''}${m.img ? `<img class="chat-msg-img" src="${m.img}" alt="Imagen" data-zoom="1" />` : ''}</div></div>`).join('');
+    l.scrollTop = l.scrollHeight;
+  }
+  function updChat() {
+    $('btn-toggle-chat').classList.toggle('hidden-when-open', chatOpen); $('chat-panel-window').classList.toggle('open', chatOpen);
+    if (chatOpen) unread = 0; const b = $('chat-unread-badge'); b.style.display = unread ? 'inline-block' : 'none'; b.textContent = unread > 99 ? '99+' : unread;
+  }
+  function addChat(m, rebroadcast) {
+    if (!m || !m.id || chatMsgs.some(x => x.id === m.id)) return;
+    chatMsgs.push(m); if (chatMsgs.length > 60) chatMsgs = chatMsgs.slice(-60);
+    if (rebroadcast) bc({ t: 'chat_msg', m });
+    if (!chatOpen && m.sid !== myId) { unread++; tone(700, .05); }
+    renderChat(); updChat();
+  }
+  function stageImg(f) {
+    if (!f || !f.type.startsWith('image/')) return; const r = new FileReader();
+    r.onload = ev => { const im = new Image(); im.onload = () => {
+      const k = Math.min(1, 480 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); staged = c.toDataURL('image/jpeg', .7);
+      $('chat-staged-thumb').src = staged; $('chat-staged-bar').classList.add('active'); }; im.src = ev.target.result; };
+    r.readAsDataURL(f);
+  }
+  function clearStaged() { staged = ''; $('chat-staged-thumb').src = ''; $('chat-staged-bar').classList.remove('active'); $('chat-image-input').value = ''; }
+  function sendChat() {
+    const inp = $('chat-text-input'), text = inp.value.trim(); if (!text && !staged) return;
+    const img = staged; inp.value = ''; clearStaged();
+    if (role === 'guest') { hostConn && hostConn.send({ t: 'chat', text, img }); }
+    else addChat({ id: 'm' + Date.now() + Math.random().toString(36).slice(2, 6), sid: 'me', name: S.profile.name, av: S.profile.av, text, img, ts: Date.now() }, role === 'host');
+  }
+  $('btn-toggle-chat').onclick = () => { chatOpen = true; updChat(); setTimeout(() => $('chat-text-input').focus(), 50); };
+  $('btn-collapse-chat').onclick = () => { chatOpen = false; updChat(); };
+  $('btn-attach-chat-img').onclick = () => $('chat-image-input').click();
+  $('chat-image-input').onchange = e => stageImg(e.target.files && e.target.files[0]);
+  $('btn-clear-staged-img').onclick = clearStaged; $('btn-send-chat').onclick = sendChat;
+  $('chat-text-input').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); sendChat(); } };
+  $('chat-text-input').onpaste = e => { const it = e.clipboardData && e.clipboardData.items; if (!it) return; for (const x of it) if (x.type.startsWith('image/')) { e.preventDefault(); stageImg(x.getAsFile()); break; } };
+  $('image-lightbox-overlay').onclick = () => $('image-lightbox-overlay').classList.remove('active');
+
+  /* ---------- Modal de perfil y clics delegados ---------- */
+  function openProfile(id) {
+    const p = V && V.players.find(x => x.id === id); if (!p) return;
+    const online = V.n === 9, isLead = online && id === 'me';
+    $('modal-player-avatar').src = avSrc(id, p.av); $('modal-player-name').textContent = p.name;
+    $('modal-player-badges').innerHTML = (isLead ? '<span class="modal-pill host">👑 Líder</span>' : '') + (id === myId ? '<span class="modal-pill">Tú</span>' : '') + (p.seat >= 0 ? `<span class="modal-pill ready">Asiento #${p.seat + 1}</span>` : '<span class="modal-pill waiting">👁 Espectador</span>');
+    $('modal-player-stats').innerHTML = `<div class="player-modal-stat-item"><div class="val">${fmt(p.stack)}</div><div class="lbl">Fichas disponibles</div></div><div class="player-modal-stat-item"><div class="val">${p.seat >= 0 ? '#' + (p.seat + 1) : 'Sin asiento'}</div><div class="lbl">En la mesa</div></div>`;
+    const act = $('modal-player-actions'); act.innerHTML = '';
+    if (role === 'host' && id !== 'me' && id !== myId && T.players[id]) { act.innerHTML = '<button class="btn-kick-danger" id="btn-kick-now">Expulsar de la sala</button>'; $('btn-kick-now').onclick = () => { kick(id); $('player-profile-modal').classList.remove('active'); }; }
+    $('player-profile-modal').classList.add('active');
+  }
+  $('btn-close-player-modal').onclick = () => $('player-profile-modal').classList.remove('active');
+  $('player-profile-modal').onclick = e => { if (e.target.id === 'player-profile-modal') e.target.classList.remove('active'); };
+  document.addEventListener('click', e => {
+    if (e.target.dataset && e.target.dataset.zoom) { $('image-lightbox-img').src = e.target.src; $('image-lightbox-overlay').classList.add('active'); return; }
+    const t = e.target.closest('[data-action]'); if (!t) return; const a = t.dataset.action;
+    if (a === 'view-player') openProfile(t.dataset.playerId);
+    else if (a === 'sit') { if (role === 'guest') hostConn && hostConn.send({ t: 'sit', i: +t.dataset.idx }); else { sit('me', +t.dataset.idx); sync(); } }
+    else if (a === 'stand') { if (role === 'guest') hostConn && hostConn.send({ t: 'stand' }); else { stand('me'); sync(); } }
+  });
 
   /* ---------- Arranque ---------- */
-  drawProfile(); initSolo();
+  drawProfile(); initSolo(); if (S.profile.lock && S.profile.pass) showLock();
   const q = new URLSearchParams(location.search).get('sala'); if (q) { $('mp-join-code').value = q; switchView('mp-view'); }
 })();
 </script>
