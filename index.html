@@ -2947,13 +2947,43 @@
       o.connect(v).connect(ac.destination); o.start(t0); o.stop(t0 + d);
     } catch (e) {}
   }
+  function ctx() { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); return ac; }
+  function noise(d, f, g = .05, dl = 0) {
+    if (!S.sound) return;
+    try {
+      const c = ctx(), n = Math.floor(c.sampleRate * d), buf = c.createBuffer(1, n, c.sampleRate), a = buf.getChannelData(0);
+      for (let i = 0; i < n; i++) a[i] = (Math.random() * 2 - 1) * (1 - i / n);
+      const s = c.createBufferSource(), fl = c.createBiquadFilter(), v = c.createGain(), t0 = c.currentTime + dl;
+      s.buffer = buf; fl.type = 'highpass'; fl.frequency.value = f; v.gain.setValueAtTime(g, t0); v.gain.exponentialRampToValueAtTime(.0001, t0 + d);
+      s.connect(fl).connect(v).connect(c.destination); s.start(t0);
+    } catch (e) {}
+  }
+  function sweep(f0, f1, d, type = 'sawtooth', g = .06, dl = 0) {
+    if (!S.sound) return;
+    try {
+      const c = ctx(), o = c.createOscillator(), v = c.createGain(), t0 = c.currentTime + dl;
+      o.type = type; o.frequency.setValueAtTime(f0, t0); o.frequency.exponentialRampToValueAtTime(f1, t0 + d);
+      v.gain.setValueAtTime(.0001, t0); v.gain.exponentialRampToValueAtTime(g, t0 + d * .8); v.gain.exponentialRampToValueAtTime(.0001, t0 + d + .05);
+      o.connect(v).connect(c.destination); o.start(t0); o.stop(t0 + d + .06);
+    } catch (e) {}
+  }
+  const clink = (dl = 0) => { const f = 2200 + Math.random() * 900; tone(f, .07, 'triangle', .05, dl); tone(f * 1.5, .05, 'sine', .03, dl + .005); noise(.04, 5000, .04, dl); };
   const sfx = {
-    deal: () => { tone(520, .07, 'triangle'); tone(660, .07, 'triangle', .06, .08); },
-    chip: () => tone(900, .06, 'square', .04),
-    fold: () => tone(180, .18, 'sawtooth', .05),
+    deal: () => { noise(.09, 1800, .05); tone(520, .06, 'triangle', .05, .02); tone(660, .06, 'triangle', .05, .09); },
+    chip: (n = 2) => { for (let k = 0; k < n; k++) clink(k * .055 + Math.random() * .02); },
+    click: () => { tone(1100, .025, 'square', .022); noise(.015, 3000, .02); },
+    check: () => { tone(300, .06, 'sine', .08); tone(300, .06, 'sine', .08, .1); },
+    fold: () => { noise(.18, 900, .05); tone(180, .18, 'sawtooth', .04); },
     turn: () => tone(880, .1),
+    collect: () => { for (let k = 0; k < 7; k++) clink(k * .07); },
+    allin: () => {
+      sweep(110, 1100, .55); tone(60, .7, 'sine', .22); noise(.5, 400, .05, .05);
+      for (let k = 0; k < 14; k++) clink(.2 + k * .05);
+      [784, 988, 1175, 1568].forEach((f, k) => tone(f, .28, 'triangle', .07, .6 + k * .07));
+    },
     win: () => [523, 659, 784, 1047].forEach((f, k) => tone(f, .2, 'triangle', .08, k * .1))
   };
+  document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('button'); if (b && !b.disabled) sfx.click(); });
 
   /* ---------- Estado persistente ---------- */
   let S = { balance: 1000, stats: { played: 0, won: 0, net: 0 }, sound: true, sec: 30, blind: 20, profile: { name: 'Jugador', av: 0, photo: '', pass: '', lock: false } };
@@ -3036,7 +3066,7 @@
     for (let r = 0; r < 2; r++) { let i = T.sb; for (let k = 0; k < el.length; k++) { T.seats[i].cards.push(T.deck.pop()); i = nextSeat(i, s => s.in); } }
     bet(T.seats[T.sb], T.blind / 2); bet(T.seats[T.bb], T.blind);
     T.cur = T.blind; T.minRaise = T.blind; T.phase = 'pre'; T.turn = T.bb;
-    sfx.deal(); proceed();
+    proceed();
   }
 
   function setTurn() {
@@ -3059,7 +3089,6 @@
     if (T.phase === 'river') return showdown();
     T.phase = { pre: 'flop', flop: 'turn', turn: 'river' }[T.phase];
     const n = T.phase === 'flop' ? 3 : 1; for (let k = 0; k < n; k++) T.board.push(T.deck.pop());
-    sfx.deal();
     if (T.seats.filter(canAct).length < 2) { T.turn = -1; tm = setTimeout(proceed, 1300); return sync(); }
     T.turn = nextSeat(T.btn, canAct); setTurn(); sync();
   }
@@ -3067,9 +3096,9 @@
   function doAct(i, a, amt) {
     const s = T.seats[i];
     if (!s || T.turn !== i || !PLAY.includes(T.phase)) return;
-    if (a === 'fold') { s.folded = true; s.last = 'Fold'; sfx.fold(); }
+    if (a === 'fold') { s.folded = true; s.last = 'Fold'; }
     else if (a === 'check' || a === 'call') {
-      if (T.cur > s.bet) { bet(s, T.cur - s.bet); s.last = s.allin ? 'All-in' : 'Call'; sfx.chip(); } else s.last = 'Check';
+      if (T.cur > s.bet) { bet(s, T.cur - s.bet); s.last = s.allin ? 'All-in' : 'Call'; } else s.last = 'Check';
       s.acted = true;
     } else if (a === 'raise') {
       const max = s.bet + s.stack; let to = Math.min(Math.round(+amt) || 0, max);
@@ -3077,7 +3106,7 @@
       const minTo = T.cur + T.minRaise; if (to < minTo) to = Math.min(minTo, max);
       if (to - T.cur >= T.minRaise) T.minRaise = to - T.cur;
       bet(s, to - s.bet); T.cur = Math.max(T.cur, s.bet);
-      s.last = s.allin ? 'All-in' : 'Sube a ' + fmt(s.bet); sfx.chip();
+      s.last = s.allin ? 'All-in' : 'Sube a ' + fmt(s.bet);
       T.seats.forEach(o => { if (o && o !== s && canAct(o)) o.acted = false; });
       s.acted = true;
     }
@@ -3135,10 +3164,20 @@
     Object.values(conns).forEach(c => { if (c.open) c.send({ t: 'state', you: sOf(c.peer), V: mask(sOf(c.peer)) }); });
     onState(); render();
   }
-  let lastCounted = 0, lastTurnKey = '';
+  let lastCounted = 0, lastTurnKey = '', lastActs = {}, primed = false, lastHandS = 0, lastBoardS = 0, collected = 0;
   function onState() {
     const me = V.seats[mySeat], mpl = V.players.find(p => p.id === myId);
     if (mpl) S.balance = mpl.stack;
+    V.seats.forEach(s => {
+      if (!s) return; const k = V.hand + ':' + s.i, prev = lastActs[k] || ''; if (s.last === prev) return; lastActs[k] = s.last;
+      if (!primed || !s.last) return;
+      if (s.last === 'All-in') sfx.allin(); else if (s.last.startsWith('Call')) sfx.chip(2); else if (s.last.startsWith('Sube')) sfx.chip(4);
+      else if (s.last === 'Fold') sfx.fold(); else if (s.last === 'Check') sfx.check();
+    });
+    if (primed && (V.hand !== lastHandS || V.board.length > lastBoardS) && V.phase !== 'wait') sfx.deal();
+    if (primed && V.phase === 'over' && V.res && collected !== V.hand) sfx.collect();
+    if (V.phase === 'over') collected = V.hand;
+    lastHandS = V.hand; lastBoardS = V.board.length; primed = true;
     if (V.phase === 'over' && V.res && lastCounted !== V.hand && me && me.in) {
       lastCounted = V.hand; const net = V.res.net[mySeat] || 0;
       S.stats.played++; S.stats.net += net; if (net > 0) { S.stats.won++; sfx.win(); }
@@ -3298,7 +3337,7 @@
   function leave(msg) {
     try { peer && peer.destroy(); } catch (e) {} peer = null; hostConn = null; conns = {};
     Object.keys(PHOTOS).forEach(k => delete PHOTOS[k]); $('host-room-info').style.display = 'none'; setMp(false);
-    if (msg) toast(msg); V = null; chatMsgs = []; renderChat(); initSolo();
+    if (msg) toast(msg); V = null; primed = false; lastActs = {}; chatMsgs = []; renderChat(); initSolo();
   }
   $('btn-leave-room').onclick = () => leave('Has salido de la sala.');
 
