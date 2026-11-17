@@ -1,16 +1,14 @@
-# Blackjack Americano — Mesa Royale
+# Texas Hold'em — Mesa Royale
 
-Aplicación web de **Blackjack Americano** lista para alojar gratis en **GitHub Pages**, con mesa circular y turnos en sentido horario, temporizador por turno con plantado automático, pausa de resumen de ganancias tras cada ronda, animaciones, efectos de sonido sintetizados, dividir pareja (**Split**), **Doblar tras dividir (DAS)** y **salas multijugador P2P de 9 huecos**.
+Aplicación web de **Texas Hold'em No-Limit** lista para alojar gratis en **GitHub Pages**, con la misma estética que Mesa Royale: mesa circular en sentido horario, temporizador por turno con retirada automática, resumen de ganancias tras cada mano, animaciones, sonidos sintetizados y **salas multijugador P2P de hasta 9 jugadores** (PeerJS).
 
-## Novedades incluidas
+- **Solitario**: juegas contra 2 bots.
+- **Online**: el líder crea la sala y comparte el código; las manos se reparten solas.
+- **Perfil**: foto de perfil, avatares, contraseña opcional, saldo visible de cada jugador y perfil ampliado al hacer clic.
+- **Chat** de la mesa con imágenes (también pegando con Ctrl+V).
+- **Espectadores**: en las salas online se entra sin asiento y se juega con “+”; el líder puede expulsar jugadores.
+- Ciegas, side pots, all-in y showdown completos. Fichas y estadísticas guardadas en el navegador.
 
-- **Mesa circular en sentido horario**: Las cartas del crupier se sitúan en el centro de la mesa y los puestos de los jugadores (3 en solitario o 9 en sala online) se distribuyen alrededor avanzando en **sentido horario**.
-- **Temporizador por turno (`10s / 15s / 20s / 30s`)**: Cuenta atrás visual en cada turno; si el tiempo se agota, la mano se planta automáticamente.
-- **Pausa de resumen post-ronda (~5 segundos)**: Al terminar cada ronda se muestra un panel con el balance neto ganado/perdido, total apostado, cobrado y el desglose por mano (con opción de saltar a la siguiente ronda al instante).
-- **Animaciones y sonidos**: Reparto secuencial de cartas, volteo 3D de la carta oculta del crupier, fichas animadas y efectos de sonido mediante Web Audio API (con botón para activar/silenciar).
-
-## Cómo subirlo a GitHub Pages
-
-1. Crea un repositorio nuevo en GitHub (por ejemplo, `blackjack`).
-2. Sube todos los archivos de esta carpeta a la raíz del repositorio.
-3. Ve a **Settings → Pages**, selecciona **Deploy from a branch**, elige `main` y `/ (root)` y pulsa **Save**.
+## Subir a GitHub Pages
+1. Sube todos los archivos a la raíz de un repositorio.
+2. **Settings → Pages → Deploy from a branch → main / (root) → Save**.
