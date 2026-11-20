@@ -2650,6 +2650,8 @@
       }
     }
     /* --- Extras Texas Hold'em --- */
+    .raise-slider{accent-color:var(--gold-bright);height:6px;flex:1;min-width:150px;max-width:420px;cursor:pointer}
+    .th-sl-lbl{font-size:.7rem;color:var(--text-muted);font-weight:700}
     .th-badge{font-size:.62rem;font-weight:800;padding:1px 6px;border-radius:999px;background:var(--gold);color:#201505;margin-left:3px}
     .th-badge.blind{background:#cfd8dc}
     .th-last{font-size:.7rem;font-weight:800;color:var(--gold-bright);min-height:15px;text-align:center}
@@ -2706,6 +2708,7 @@
       <button class="nav-tab" data-view="mp-view"><span class="mp-dot" id="mp-status-dot"></span>Multijugador (9)</button>
       <button class="nav-tab" data-view="profile-view">Perfil</button>
       <button class="nav-tab" data-view="bank-view">Banca / Reiniciar</button>
+      <button class="nav-tab" data-view="settings-view">⚙ Ajustes</button>
     </div>
     <div class="header-right">
       <button class="icon-toggle-btn" id="btn-toggle-sound" title="Activar / silenciar sonidos">🔊</button>
@@ -2766,6 +2769,11 @@
             <button class="mini-btn" id="r-half">½ bote</button>
             <button class="mini-btn" id="r-pot">Bote</button>
             <input type="number" id="raise-input" class="styled-input" min="0" step="1" inputmode="numeric" />
+          </div>
+          <div class="th-raise" style="width:100%;">
+            <span class="th-sl-lbl" id="raise-min-lbl">Mín.</span>
+            <input type="range" id="raise-slider" class="raise-slider" min="0" max="100" step="1" value="0" />
+            <span class="th-sl-lbl" id="raise-max-lbl">All-in</span>
           </div>
         </div>
 
@@ -2850,6 +2858,34 @@
         </div>
       </div>
     </div></div>
+  </section>
+
+  <section id="settings-view" class="view">
+    <div class="subpage-container">
+      <div class="card-panel" id="leader-only-note" style="display:none;">
+        <h2>Ajustes</h2><p>Solo el <strong>líder</strong> de la sala puede usar estos ajustes.</p>
+      </div>
+      <div id="leader-panel">
+        <div class="card-panel" style="border-color:rgba(231,76,60,.4);">
+          <h2 style="color:#ff8a80;">Reinicio de la mesa</h2>
+          <p>Hace que <strong>todos se levanten</strong> de la mesa y pone las fichas de todos los jugadores en la cantidad que elijas. Escribe literalmente <strong>reinicio</strong> para confirmar.</p>
+          <div class="reset-box" style="flex-wrap:wrap;">
+            <input type="number" id="reinicio-amount" class="styled-input" style="width:160px;" min="1" step="1" value="1000" />
+            <input type="text" id="reinicio-confirm" class="styled-input" style="width:200px;" placeholder="Escribe: reinicio" autocomplete="off" />
+            <button class="reset-confirm-btn" id="btn-reinicio" disabled>Reinicio</button>
+          </div>
+        </div>
+        <div class="card-panel" id="transfer-box">
+          <h2>Traspasar el liderazgo</h2>
+          <p>Elige a otro jugador de la sala para que sea el nuevo líder. La mesa se pausa unos segundos mientras todos se reconectan con el mismo código; tú pasarás a ser un jugador más.</p>
+          <div class="reset-box" style="flex-wrap:wrap;">
+            <select id="leader-target" class="styled-input" style="width:220px;"></select>
+            <button class="primary-cta" id="btn-transfer">👑 Hacer líder</button>
+          </div>
+        </div>
+      </div>
+      <div class="status-toast" id="settings-feedback"></div>
+    </div>
   </section>
 
   <section id="bank-view" class="view">
@@ -3033,7 +3069,7 @@
   function addPlayer(id, name, av, stack, bot, seat) { T.players[id] = { id, name, av, stack, bot: !!bot, seat: -1 }; if (seat >= 0) sit(id, seat); }
   function sit(id, i) {
     const p = T.players[id]; if (!p || p.seat >= 0 || i < 0 || i >= T.n || T.seats[i]) return false;
-    if (p.stack <= 0) p.stack = 1000; T.seats[i] = mkSeat(i, id, p.name, p.av, p.stack, p.bot); p.seat = i; return true;
+    if (p.stack <= 0 && !p.bot) return false; if (p.stack <= 0) p.stack = 1000; T.seats[i] = mkSeat(i, id, p.name, p.av, p.stack, p.bot); p.seat = i; return true;
   }
   function stand(id) {
     const p = T.players[id]; if (!p || p.seat < 0) return; const s = T.seats[p.seat];
@@ -3041,7 +3077,7 @@
   }
   function initSolo() {
     clearT(); clearTimeout(nxt); role = 'solo'; myId = 'me'; T = mkTable(3);
-    addPlayer('b1', 'Marta', 3, 1000, true, 0); addPlayer('b2', 'Dani', 4, 1000, true, 1); addPlayer('me', S.profile.name, S.profile.av, S.balance || 1000, false, 2);
+    addPlayer('b1', 'Marta', 3, 1000, true, 0); addPlayer('b2', 'Dani', 4, 1000, true, 1); addPlayer('me', S.profile.name, S.profile.av, Number.isFinite(S.balance) ? S.balance : 1000, false, 2);
     setMyPhoto(); sync();
   }
   const clearT = () => { clearTimeout(tm); tm = null; };
@@ -3054,7 +3090,8 @@
   function startHand() {
     clearT(); clearTimeout(nxt);
     T.seats.forEach((s, i) => { if (!s) return; if (s.gone) T.seats[i] = null; else if (s.leave) { const p = T.players[s.id]; if (p) { p.stack = s.stack; p.seat = -1; } T.seats[i] = null; } });
-    T.seats.forEach(s => { if (s && s.stack <= 0) s.stack = 1000; });
+    T.seats.forEach((s, i) => { if (!s || s.stack > 0) return; if (s.bot) s.stack = 1000; else { const p = T.players[s.id]; if (p) { p.stack = 0; p.seat = -1; } T.seats[i] = null; } });
+    if (role === 'solo' && T.players.me && T.players.me.seat < 0) { T.phase = 'wait'; return sync(); }
     T.blind = +$('blind-select').value; T.sec = +$('turn-duration-select').value;
     const el = T.seats.filter(s => s && s.stack > 0);
     if (el.length < 2) { T.phase = 'wait'; return sync(); }
@@ -3087,10 +3124,15 @@
     T.seats.forEach(s => { if (s) { s.bet = 0; s.acted = false; } });
     T.cur = 0; T.minRaise = T.blind;
     if (T.phase === 'river') return showdown();
-    T.phase = { pre: 'flop', flop: 'turn', turn: 'river' }[T.phase];
-    const n = T.phase === 'flop' ? 3 : 1; for (let k = 0; k < n; k++) T.board.push(T.deck.pop());
-    if (T.seats.filter(canAct).length < 2) { T.turn = -1; tm = setTimeout(proceed, 1300); return sync(); }
-    T.turn = nextSeat(T.btn, canAct); setTurn(); sync();
+    const runout = T.seats.filter(canAct).length < 2;
+    const dealStreet = () => {
+      T.phase = { pre: 'flop', flop: 'turn', turn: 'river' }[T.phase];
+      const n = T.phase === 'flop' ? 3 : 1; for (let k = 0; k < n; k++) T.board.push(T.deck.pop());
+      if (T.seats.filter(canAct).length < 2) { T.turn = -1; tm = setTimeout(proceed, 2800); return sync(); }
+      T.turn = nextSeat(T.btn, canAct); setTurn(); sync();
+    };
+    if (runout && !T.show) { T.show = true; T.turn = -1; tm = setTimeout(dealStreet, 2600); return sync(); }
+    dealStreet();
   }
 
   function doAct(i, a, amt) {
@@ -3194,19 +3236,29 @@
     return `--spot-left:${(50 + rx * Math.cos(rad)).toFixed(2)}%; --spot-top:${(52 + ry * Math.sin(rad)).toFixed(2)}%;`;
   }
   let prevBoard = 0, lastHandR = 0, raiseVal = 0, raiseKey = '';
+  function updRaiseUI() {
+    const me = V && V.seats[mySeat]; if (!me) return;
+    const mn = Math.min(V.cur + V.minRaise, me.bet + me.stack), mx = me.bet + me.stack;
+    raiseVal = Math.min(Math.max(Math.round(raiseVal) || mn, mn), mx);
+    const sl = $('raise-slider'); sl.min = mn; sl.max = mx; sl.step = 1; sl.value = raiseVal;
+    if (document.activeElement !== $('raise-input')) $('raise-input').value = raiseVal;
+    $('raise-input').min = mn; $('raise-input').dataset.minTo = mn;
+    $('raise-min-lbl').textContent = fmt(mn); $('raise-max-lbl').textContent = fmt(mx) + ' (all-in)';
+    $('btn-raise').textContent = raiseVal >= mx ? 'ALL-IN ' + fmt(raiseVal) : (V.cur === 0 ? 'APOSTAR ' : 'SUBIR A ') + fmt(raiseVal);
+  }
   function render() {
     if (!V) return;
     const me = V.seats[mySeat], P = V.seats.reduce((a, s) => a + (s ? s.tot : 0), 0), fresh = V.hand !== lastHandR;
     $('dealer-score').textContent = fmt(P);
     $('dealer-cards').innerHTML = [0, 1, 2, 3, 4].map(k => V.board[k] ? cardHTML(V.board[k], k >= prevBoard) : '<div class="card hidden-card" style="opacity:.14"></div>').join('');
-    $('table-rules-text').textContent = `CIEGAS ${V.blind / 2}/${V.blind} · ${PH[V.phase]}`;
+    $('table-rules-text').textContent = `CIEGAS ${V.blind / 2}/${V.blind} · ${PH[V.phase]}${V.show && PLAY.includes(V.phase) ? ' · ALL-IN: CARTAS A LA VISTA' : ''}`;
     $('dealer-center-hub').classList.toggle('dealer-active', PLAY.includes(V.phase));
     prevBoard = V.board.length;
     const grid = $('spots-grid'); grid.classList.toggle('online-9', V.n === 9);
-    const online = V.n === 9, iSeated = mySeat >= 0;
+    const online = V.n === 9, iSeated = mySeat >= 0, mpl2 = V.players.find(p => p.id === myId), canSit = !iSeated && !!mpl2 && mpl2.stack > 0;
     grid.innerHTML = V.seats.map((s, i) => {
       const st = posStyle(i);
-      if (!s) return `<div class="spot-slot" style="${st}">${online && !iSeated ? `<button class="open-spot-btn" data-action="sit" data-idx="${i}" title="Sentarme en el asiento #${i + 1}">+</button><span class="open-spot-hint">Asiento #${i + 1}</span>` : '<span class="open-spot-hint" style="opacity:.4">Asiento libre</span>'}</div>`;
+      if (!s) return `<div class="spot-slot" style="${st}">${canSit ? `<button class="open-spot-btn" data-action="sit" data-idx="${i}" title="Sentarme en el asiento #${i + 1}">+</button><span class="open-spot-hint">Asiento #${i + 1}</span>` : '<span class="open-spot-hint" style="opacity:.4">Asiento libre</span>'}</div>`;
       const mine = s.id === myId, isTurn = V.turn === i && PLAY.includes(V.phase), won = V.res && V.res.won[i] > 0;
       const net = V.res && V.res.net[i], cls = V.phase === 'over' && s.in ? (net > 0 ? 'outcome-win-slot' : net < 0 ? 'outcome-loss-slot' : 'outcome-push-slot') : '';
       const rem = isTurn ? Math.max(0, (V.local - Date.now()) / 1000) : 0;
@@ -3230,19 +3282,17 @@
     const bc = $('betting-controls'), pc = $('play-controls'), sd = $('round-summary-dock');
     bc.style.display = V.phase === 'wait' ? '' : 'none'; pc.classList.toggle('active', PLAY.includes(V.phase)); sd.classList.toggle('active', V.phase === 'over');
     $('btn-deal').style.display = role === 'guest' ? 'none' : '';
-    $('mp-status-hint').textContent = (online && !iSeated) ? '👁 Espectador · pulsa + en un asiento para jugar' : (role === 'guest' ? 'Esperando a que el líder reparta…' : (V.seats.filter(s => s).length < 2 ? 'Esperando jugadores…' : ''));
+    $('mp-status-hint').textContent = !iSeated ? ((mpl2 && mpl2.stack > 0) ? '👁 Espectador · pulsa + en un asiento para jugar' : (role === 'guest' ? '💸 Sin fichas · el líder puede reiniciar la mesa desde Ajustes' : '💸 Sin fichas · usa “Reinicio” en Ajustes')) : (role === 'guest' ? 'Esperando a que el líder reparta…' : (V.seats.filter(s => s).length < 2 ? 'Esperando jugadores…' : ''));
     $('blind-select').disabled = $('turn-duration-select').disabled = role === 'guest';
     if (PLAY.includes(V.phase) && me) {
       const my = V.turn === mySeat, toCall = Math.min(V.cur - me.bet, me.stack), ts = V.seats[V.turn];
-      $('turn-avatar').src = ts ? avSrc(ts.id, ts.av) : ''; $('turn-indicator').textContent = my ? '¡Es tu turno!' : 'Turno: ' + (ts ? ts.name : '…');
-      const minTo = Math.min(V.cur + V.minRaise, me.bet + me.stack), key = V.hand + V.phase + V.turn;
-      if (key !== raiseKey) { raiseKey = key; raiseVal = minTo; if (my) sfx.turn(); }
-      if (document.activeElement !== $('raise-input')) $('raise-input').value = raiseVal;
+      $('turn-avatar').src = ts ? avSrc(ts.id, ts.av) : ''; $('turn-indicator').textContent = my ? '¡Es tu turno!' : (V.turn < 0 ? 'Repartiendo las cartas restantes…' : 'Turno: ' + (ts ? ts.name : '…'));
+      const key = V.hand + V.phase + V.turn;
+      if (key !== raiseKey) { raiseKey = key; raiseVal = 0; if (my) sfx.turn(); }
       $('btn-call').textContent = toCall > 0 ? `IGUALAR ${fmt(toCall)}` : 'CHECK';
-      $('btn-raise').textContent = V.cur === 0 ? 'APOSTAR' : 'SUBIR';
       ['btn-fold', 'btn-call', 'btn-raise', 'btn-allin'].forEach(id => $(id).disabled = !my);
       $('btn-raise').disabled = !my || me.stack <= toCall; $('btn-allin').disabled = !my || me.stack <= 0;
-      $('raise-input').min = minTo; $('raise-input').dataset.minTo = minTo;
+      $('raise-slider').disabled = $('raise-input').disabled = $('btn-raise').disabled; updRaiseUI();
     }
     if (V.phase === 'over' && V.res) {
       const net = V.res.net[mySeat] || 0, b = $('summary-net-badge');
@@ -3254,7 +3304,7 @@
     }
     $('stat-balance').textContent = fmt(S.balance); $('stat-net').textContent = (S.stats.net >= 0 ? '+' : '') + fmt(S.stats.net);
     $('stat-played').textContent = S.stats.played; $('stat-won').textContent = S.stats.won;
-    $('btn-toggle-sound').textContent = S.sound ? '🔊' : '🔇';
+    $('btn-toggle-sound').textContent = S.sound ? '🔊' : '🔇'; updLeaderUI();
     $('mp-players-list').innerHTML = V.players.map(p => `<div class="th-pl" data-action="view-player" data-player-id="${esc(p.id)}" style="cursor:pointer"><img src="${avSrc(p.id, p.av)}" alt=""/><strong>${esc(p.name)}</strong><span class="player-balance-tag">💰 ${fmt(p.stack)}</span><span class="th-chip">${p.seat >= 0 ? 'Asiento #' + (p.seat + 1) : '👁 Espectador'}</span></div>`).join('');
   }
 
@@ -3275,12 +3325,13 @@
   const uiAct = (a, amt) => { if (role === 'guest') { hostConn && hostConn.send({ t: 'act', a, amt }); } else doAct(mySeat, a, amt); };
   $('btn-fold').onclick = () => uiAct('fold');
   $('btn-call').onclick = () => uiAct('call');
-  $('btn-raise').onclick = () => uiAct('raise', +$('raise-input').value);
+  $('btn-raise').onclick = () => { updRaiseUI(); uiAct('raise', raiseVal); };
   $('btn-allin').onclick = () => { const me = V.seats[mySeat]; uiAct('raise', me.bet + me.stack); };
-  $('r-min').onclick = () => { $('raise-input').value = raiseVal = +$('raise-input').dataset.minTo; };
-  const potRaise = f => { const me = V.seats[mySeat], P = V.seats.reduce((a, s) => a + (s ? s.tot : 0), 0), call = V.cur - me.bet; $('raise-input').value = raiseVal = Math.max(+$('raise-input').dataset.minTo, Math.round(V.cur + (P + call) * f)); };
+  $('r-min').onclick = () => { raiseVal = 0; updRaiseUI(); };
+  const potRaise = f => { const me = V.seats[mySeat], P = V.seats.reduce((a, s) => a + (s ? s.tot : 0), 0), call = V.cur - me.bet; raiseVal = Math.round(V.cur + (P + call) * f); updRaiseUI(); };
   $('r-half').onclick = () => potRaise(.5); $('r-pot').onclick = () => potRaise(1);
-  $('raise-input').oninput = e => raiseVal = +e.target.value;
+  $('raise-input').oninput = e => { raiseVal = +e.target.value; updRaiseUI(); };
+  $('raise-slider').oninput = e => { raiseVal = +e.target.value; updRaiseUI(); };
   $('btn-deal').onclick = () => { if (role !== 'guest') startHand(); };
   $('btn-skip-post-round').onclick = () => { if (role !== 'guest' && T.phase === 'over') startHand(); };
   $('btn-toggle-sound').onclick = () => { S.sound = !S.sound; save(); render(); };
@@ -3364,61 +3415,140 @@
     dropPlayer(id); toast('Jugador expulsado.');
   }
 
+  function hostOnConnection(c) {
+    c.on('data', m => {
+      if (!m || !T) return; const id = c.peer;
+      if (m.t === 'join') {
+        if (T.players[id]) { conns[id] = c; c.send({ t: 'photos', map: PHOTOS }); c.send({ t: 'chat_hist', msgs: chatMsgs.slice(-30) }); sync(); return; }
+        if (Object.keys(T.players).length >= 14) { c.send({ t: 'full' }); return; }
+        conns[id] = c; addPlayer(id, clean(m.name), AV[m.av] ? m.av : 0, Math.max(+m.stack || 0, 0), false, -1);
+        if (typeof m.photo === 'string' && m.photo.startsWith('data:image/') && m.photo.length < 60000) { PHOTOS[id] = m.photo; bc({ t: 'photo', id, src: m.photo }, id); }
+        c.send({ t: 'photos', map: PHOTOS }); c.send({ t: 'chat_hist', msgs: chatMsgs.slice(-30) });
+        toast(T.players[id].name + ' se ha unido como espectador.'); sync(); return;
+      }
+      const p = T.players[id]; if (!p) return;
+      if (m.t === 'act') { if (p.seat >= 0) doAct(p.seat, m.a, m.amt); }
+      else if (m.t === 'sit') { if (sit(id, +m.i)) sync(); }
+      else if (m.t === 'stand') { stand(id); sync(); }
+      else if (m.t === 'prof') updProfile(id, m);
+      else if (m.t === 'chat') addChat({ id: 'm' + Date.now() + Math.random().toString(36).slice(2, 6), sid: id, name: p.name, av: p.av, text: String(m.text || '').slice(0, 1000), img: (typeof m.img === 'string' && m.img.startsWith('data:image/') && m.img.length < 400000) ? m.img : '', ts: Date.now() }, true);
+    });
+    c.on('close', () => { if (conns[c.peer] === c) dropPlayer(c.peer); });
+  }
   $('btn-create-room').onclick = () => {
     if (typeof Peer === 'undefined') return toast('No se pudo cargar PeerJS. Revisa tu conexión.');
     leave(); const code = 'TH-' + Math.floor(1000 + Math.random() * 9000);
     peer = new Peer('thr-' + code.toLowerCase());
     peer.on('error', e => toast('Error de sala: ' + e.type + (e.type === 'unavailable-id' ? ' (inténtalo de nuevo)' : '')));
     peer.on('open', () => {
-      clearT(); clearTimeout(nxt); role = 'host'; myId = 'me'; T = mkTable(9); addPlayer('me', S.profile.name, S.profile.av, S.balance || 1000, false, 6); setMyPhoto();
+      clearT(); clearTimeout(nxt); role = 'host'; myId = 'me'; T = mkTable(9); addPlayer('me', S.profile.name, S.profile.av, Number.isFinite(S.balance) ? S.balance : 1000, false, 6); setMyPhoto();
       $('host-code-text').textContent = code; $('host-room-info').style.display = 'flex'; setMp(true); toast('Sala creada. Comparte el código; los invitados entran como espectadores y se sientan con “+”.'); sync();
     });
-    peer.on('connection', c => {
-      c.on('data', m => {
-        if (!m || !T) return; const id = c.peer;
-        if (m.t === 'join') {
-          if (Object.keys(T.players).length >= 14) { c.send({ t: 'full' }); return; }
-          conns[id] = c; addPlayer(id, clean(m.name), AV[m.av] ? m.av : 0, Math.max(+m.stack || 0, 0) || 1000, false, -1);
-          if (typeof m.photo === 'string' && m.photo.startsWith('data:image/') && m.photo.length < 60000) { PHOTOS[id] = m.photo; bc({ t: 'photo', id, src: m.photo }, id); }
-          c.send({ t: 'photos', map: PHOTOS }); c.send({ t: 'chat_hist', msgs: chatMsgs.slice(-30) });
-          toast(T.players[id].name + ' se ha unido como espectador.'); sync(); return;
-        }
-        const p = T.players[id]; if (!p) return;
-        if (m.t === 'act') { if (p.seat >= 0) doAct(p.seat, m.a, m.amt); }
-        else if (m.t === 'sit') { if (sit(id, +m.i)) sync(); }
-        else if (m.t === 'stand') { stand(id); sync(); }
-        else if (m.t === 'prof') updProfile(id, m);
-        else if (m.t === 'chat') addChat({ id: 'm' + Date.now() + Math.random().toString(36).slice(2, 6), sid: id, name: p.name, av: p.av, text: String(m.text || '').slice(0, 1000), img: (typeof m.img === 'string' && m.img.startsWith('data:image/') && m.img.length < 400000) ? m.img : '', ts: Date.now() }, true);
-      });
-      c.on('close', () => dropPlayer(c.peer));
-    });
+    peer.on('connection', hostOnConnection);
   };
+  const sendJoin = c => c.send({ t: 'join', name: S.profile.name, av: S.profile.av, photo: S.profile.photo, stack: S.balance });
+  function attachGuest(c) {
+    hostConn = c;
+    c.on('data', m => {
+      if (!m) return;
+      if (m.t === 'state') { mySeat = m.you; V = m.V; V.local = Date.now() + V.dl; V.nlocal = Date.now() + V.nx; onState(); render(); }
+      else if (m.t === 'photos') { Object.assign(PHOTOS, m.map); setMyPhoto(); render(); }
+      else if (m.t === 'photo') { if (m.src) PHOTOS[m.id] = m.src; else if (m.id !== myId) delete PHOTOS[m.id]; render(); }
+      else if (m.t === 'chat_hist') { chatMsgs = m.msgs || []; renderChat(); }
+      else if (m.t === 'chat_msg') addChat(m.m, false);
+      else if (m.t === 'promote') becomeHost(m);
+      else if (m.t === 'newhost') { const old = hostConn; hostConn = null; try { old.close(); } catch (e) {} toast('El líder ha cambiado. Reconectando…'); setTimeout(() => rejoin(m.code, 14), 2500); }
+      else if (m.t === 'kicked') leave('Has sido expulsado de la sala.');
+      else if (m.t === 'full') leave('La sala está llena.');
+    });
+    c.on('close', () => { if (c === hostConn) leave('El líder cerró la sala.'); });
+  }
   function join(code) {
     if (typeof Peer === 'undefined') return toast('No se pudo cargar PeerJS. Revisa tu conexión.');
     leave(); toast('Conectando…'); peer = new Peer();
-    peer.on('error', e => toast('No se pudo conectar (' + e.type + ')'));
+    peer.on('error', e => { if (e.type === 'peer-unavailable' && role === 'guest') return; toast('No se pudo conectar (' + e.type + ')'); });
     peer.on('open', id => {
-      const c = peer.connect('thr-' + code.toLowerCase(), { reliable: true }); hostConn = c;
+      const c = peer.connect('thr-' + code.toLowerCase(), { reliable: true });
       c.on('open', () => {
-        clearT(); clearTimeout(nxt); role = 'guest'; T = null; mySeat = -1; myId = id; setMyPhoto(); setMp(true);
-        c.send({ t: 'join', name: S.profile.name, av: S.profile.av, photo: S.profile.photo, stack: S.balance }); toast('Conectado a ' + code.toUpperCase() + ' como espectador. Pulsa “+” en un asiento libre para jugar.'); switchView('table-view');
+        clearT(); clearTimeout(nxt); role = 'guest'; T = null; mySeat = -1; myId = id; setMyPhoto(); setMp(true); attachGuest(c); sendJoin(c);
+        toast('Conectado a ' + code.toUpperCase() + ' como espectador. Pulsa “+” en un asiento libre para jugar.'); switchView('table-view');
       });
-      c.on('data', m => {
-        if (!m) return;
-        if (m.t === 'state') { mySeat = m.you; V = m.V; V.local = Date.now() + V.dl; V.nlocal = Date.now() + V.nx; onState(); render(); }
-        else if (m.t === 'photos') { Object.assign(PHOTOS, m.map); setMyPhoto(); render(); }
-        else if (m.t === 'photo') { if (m.src) PHOTOS[m.id] = m.src; else if (m.id !== myId) delete PHOTOS[m.id]; render(); }
-        else if (m.t === 'chat_hist') { chatMsgs = m.msgs || []; renderChat(); }
-        else if (m.t === 'chat_msg') addChat(m.m, false);
-        else if (m.t === 'kicked') leave('Has sido expulsado de la sala.');
-        else if (m.t === 'full') leave('La sala está llena.');
-      });
-      c.on('close', () => leave('El líder cerró la sala.'));
     });
+  }
+  function rejoin(code, tries) {
+    if (!peer || peer.destroyed) return;
+    const c = peer.connect('thr-' + code.toLowerCase(), { reliable: true }); let done = false;
+    const fail = () => { if (done) return; done = true; try { c.close(); } catch (e) {} if (tries > 0) setTimeout(() => rejoin(code, tries - 1), 700); else leave('No se pudo reconectar con el nuevo líder.'); };
+    const to = setTimeout(fail, 3500);
+    c.on('open', () => { if (done) return; done = true; clearTimeout(to); role = 'guest'; attachGuest(c); sendJoin(c); toast('Reconectado a la sala.'); });
+  }
+  /* --- Traspaso de liderazgo: el estado de la mesa migra al nuevo líder, que recoge el mismo código de sala --- */
+  function exportRoom(G, npId) {
+    const m = x => x === 'me' ? npId : x === G ? 'me' : x, snap = JSON.parse(JSON.stringify(T)), pl = {};
+    Object.values(snap.players).forEach(p => { p.id = m(p.id); pl[p.id] = p; }); snap.players = pl; snap.seats.forEach(s => { if (s) s.id = m(s.id); });
+    snap.dl = Math.max(0, T.deadline - Date.now()); snap.nx = Math.max(0, T.nextAt - Date.now());
+    const ph = {}; Object.keys(PHOTOS).forEach(k => ph[m(k)] = PHOTOS[k]);
+    return { T: snap, ph, ch: chatMsgs.map(x => ({ ...x, sid: m(x.sid) })) };
+  }
+  function transferLeader(G) {
+    const c = conns[G]; if (role !== 'host' || !c || !c.open) return $('settings-feedback').textContent = 'Ese jugador ya no está conectado.';
+    const code = $('host-code-text').textContent, fb = $('settings-feedback'); fb.textContent = 'Traspasando el liderazgo…';
+    const np = new Peer();
+    np.on('error', e => { if (e.type !== 'peer-unavailable') fb.textContent = 'No se pudo traspasar (' + e.type + ')'; });
+    np.on('open', npId => {
+      clearT(); clearTimeout(nxt);
+      c.send({ t: 'promote', ...exportRoom(G, npId), code });
+      Object.values(conns).forEach(o => { if (o !== c && o.open) o.send({ t: 'newhost', code }); });
+      const old = peer; peer = np; role = 'guest'; myId = npId; hostConn = null; conns = {}; T = null; $('host-room-info').style.display = 'none'; updLeaderUI();
+      fb.textContent = 'Liderazgo traspasado. Ahora eres un jugador más.';
+      setTimeout(() => { try { old.destroy(); } catch (e) {} setTimeout(() => rejoin(code, 14), 1500); }, 700);
+    });
+  }
+  function resume() {
+    if (PLAY.includes(T.phase)) { if (T.turn >= 0) setTurn(); else tm = setTimeout(proceed, 1500); }
+    else if (T.phase === 'over') nxt = setTimeout(startHand, Math.max(1500, T.nextAt - Date.now()));
+  }
+  function becomeHost(m) {
+    const old = hostConn; hostConn = null; try { old && old.close(); } catch (e) {} try { peer && peer.destroy(); } catch (e) {}
+    T = m.T; T.deadline = Date.now() + (T.dl || 0); T.nextAt = Date.now() + (T.nx || 0); role = 'host'; myId = 'me'; conns = {};
+    Object.keys(PHOTOS).forEach(k => delete PHOTOS[k]); Object.assign(PHOTOS, m.ph || {}); chatMsgs = m.ch || [];
+    toast('Eres el nuevo líder. Preparando la sala…');
+    const start = tries => {
+      peer = new Peer('thr-' + m.code.toLowerCase());
+      peer.on('error', e => { if (e.type === 'unavailable-id' && tries > 0) { try { peer.destroy(); } catch (x) {} setTimeout(() => start(tries - 1), 1000); } else if (e.type !== 'peer-unavailable') toast('Error de sala: ' + e.type); });
+      peer.on('open', () => { $('host-code-text').textContent = m.code; $('host-room-info').style.display = 'flex'; setMp(true); renderChat(); updChat(); toast('Eres el nuevo líder de la sala ' + m.code + '.'); resume(); sync(); });
+      peer.on('connection', hostOnConnection);
+    };
+    start(15); sync();
   }
   $('btn-join-room').onclick = () => { const c = $('mp-join-code').value.trim(); if (c) join(c); else toast('Introduce un código de sala.'); };
   $('btn-copy-code').onclick = () => { navigator.clipboard && navigator.clipboard.writeText($('host-code-text').textContent); toast('Código copiado'); };
   $('btn-copy-link').onclick = () => { navigator.clipboard && navigator.clipboard.writeText(location.origin + location.pathname + '?sala=' + $('host-code-text').textContent); toast('Enlace copiado'); };
+
+  /* ---------- Ajustes del líder ---------- */
+  function resetTable(amount) {
+    clearT(); clearTimeout(nxt); amount = Math.min(1000000, Math.max(1, Math.round(+amount) || 1000));
+    T.seats.fill(null); Object.values(T.players).forEach(p => { p.stack = amount; p.seat = -1; });
+    T.phase = 'wait'; T.board = []; T.turn = -1; T.show = false; T.res = null; T.btn = T.sb = T.bb = -1; T.cur = 0;
+    if (role === 'solo') { sit('b1', 0); sit('b2', 1); }
+    sync(); return amount;
+  }
+  function updLeaderUI() {
+    const lead = role !== 'guest';
+    $('leader-panel').style.display = lead ? '' : 'none'; $('leader-only-note').style.display = lead ? 'none' : ''; $('transfer-box').style.display = role === 'host' ? '' : 'none';
+    if (role === 'host' && V) {
+      const opts = V.players.filter(p => p.id !== 'me').map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join(''), sel = $('leader-target');
+      if (sel.dataset.sig !== opts) { const cur = sel.value; sel.dataset.sig = opts; sel.innerHTML = opts || '<option value="">(no hay más jugadores)</option>'; if (cur) sel.value = cur; }
+    }
+  }
+  $('reinicio-confirm').oninput = e => $('btn-reinicio').disabled = e.target.value.trim().toLowerCase() !== 'reinicio';
+  $('btn-reinicio').onclick = () => {
+    if (role === 'guest' || !T) return; const a = resetTable($('reinicio-amount').value);
+    $('reinicio-confirm').value = ''; $('btn-reinicio').disabled = true;
+    $('settings-feedback').textContent = `Mesa reiniciada: todos se han levantado y cada jugador tiene ${fmt(a)}. Siéntate con “+”.`; switchView('table-view');
+  };
+  $('btn-transfer').onclick = () => { const id = $('leader-target').value; if (id) transferLeader(id); else $('settings-feedback').textContent = 'No hay otros jugadores en la sala.'; };
+  updLeaderUI();
 
   /* ---------- Chat con imágenes ---------- */
   let chatMsgs = [], chatOpen = false, unread = 0, staged = '';
@@ -3474,7 +3604,7 @@
     $('modal-player-badges').innerHTML = (isLead ? '<span class="modal-pill host">👑 Líder</span>' : '') + (id === myId ? '<span class="modal-pill">Tú</span>' : '') + (p.seat >= 0 ? `<span class="modal-pill ready">Asiento #${p.seat + 1}</span>` : '<span class="modal-pill waiting">👁 Espectador</span>');
     $('modal-player-stats').innerHTML = `<div class="player-modal-stat-item"><div class="val">${fmt(p.stack)}</div><div class="lbl">Fichas disponibles</div></div><div class="player-modal-stat-item"><div class="val">${p.seat >= 0 ? '#' + (p.seat + 1) : 'Sin asiento'}</div><div class="lbl">En la mesa</div></div>`;
     const act = $('modal-player-actions'); act.innerHTML = '';
-    if (role === 'host' && id !== 'me' && id !== myId && T.players[id]) { act.innerHTML = '<button class="btn-kick-danger" id="btn-kick-now">Expulsar de la sala</button>'; $('btn-kick-now').onclick = () => { kick(id); $('player-profile-modal').classList.remove('active'); }; }
+    if (role === 'host' && id !== 'me' && id !== myId && T.players[id]) { act.innerHTML = '<button class="mini-btn gold-outline" id="btn-promote-now" style="width:100%;margin-bottom:8px;">👑 Hacer líder</button><button class="btn-kick-danger" id="btn-kick-now">Expulsar de la sala</button>'; $('btn-kick-now').onclick = () => { kick(id); $('player-profile-modal').classList.remove('active'); }; $('btn-promote-now').onclick = () => { $('player-profile-modal').classList.remove('active'); transferLeader(id); }; }
     $('player-profile-modal').classList.add('active');
   }
   $('btn-close-player-modal').onclick = () => $('player-profile-modal').classList.remove('active');
