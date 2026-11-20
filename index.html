@@ -2652,6 +2652,8 @@
     /* --- Extras Texas Hold'em --- */
     .raise-slider{accent-color:var(--gold-bright);height:6px;flex:1;min-width:150px;max-width:420px;cursor:pointer}
     .th-sl-lbl{font-size:.7rem;color:var(--text-muted);font-weight:700}
+    .spot-owner-info{min-width:0}.spot-owner-name{display:flex;align-items:center;min-width:0}
+    .th-nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:11ch}
     .th-badge{font-size:.62rem;font-weight:800;padding:1px 6px;border-radius:999px;background:var(--gold);color:#201505;margin-left:3px}
     .th-badge.blind{background:#cfd8dc}
     .th-last{font-size:.7rem;font-weight:800;color:var(--gold-bright);min-height:15px;text-align:center}
@@ -2740,6 +2742,9 @@
             <div class="bet-helpers">
               <div class="timer-select-pill"><span>Ciegas:</span>
                 <select id="blind-select"><option value="20">10/20</option><option value="50">25/50</option><option value="100">50/100</option></select>
+              </div>
+              <div class="timer-select-pill"><span>⚡ Velocidad:</span>
+                <select id="speed-select"><option value="lento">Lento</option><option value="normal" selected>Normal</option><option value="rapido">Rápido</option><option value="turbo">Turbo</option></select>
               </div>
               <div class="timer-select-pill"><span>⏱ Turno:</span>
                 <select id="turn-duration-select"><option value="15">15s</option><option value="20">20s</option><option value="30" selected>30s</option><option value="45">45s</option></select>
@@ -2966,7 +2971,7 @@
   const PHOTOS = {}; let myId = 'me';
   const AV = [avatar('♠', '#155d3e', '#08291b', '#f6df8d'), avatar('♦', '#7b1e26', '#2b090d', '#ffd166'), avatar('♣', '#1b3b5a', '#0b1929', '#90e0ef'), avatar('♥', '#6a1b4d', '#24081a', '#ffafcc'), avatar('♛', '#8c6218', '#3b2706', '#fff3b0'), avatar('★', '#2d3a3a', '#111717', '#d4af37')];
   const avSrc = (id, av) => PHOTOS[id] || AV[av] || AV[0];
-  const clean = s => String(s || 'Jugador').trim().slice(0, 24) || 'Jugador';
+  const clean = s => String(s || 'Jugador').trim().slice(0, 200) || 'Jugador';
   const HN = ['Carta alta', 'Pareja', 'Doble pareja', 'Trío', 'Escalera', 'Color', 'Full house', 'Póker', 'Escalera de color'];
   const PH = { wait: 'ESPERANDO', pre: 'PRE-FLOP', flop: 'FLOP', turn: 'TURN', river: 'RIVER', show: 'SHOWDOWN', over: 'FIN DE MANO' };
   const PLAY = ['pre', 'flop', 'turn', 'river'];
@@ -3022,7 +3027,7 @@
   document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('button'); if (b && !b.disabled) sfx.click(); });
 
   /* ---------- Estado persistente ---------- */
-  let S = { balance: 1000, stats: { played: 0, won: 0, net: 0 }, sound: true, sec: 30, blind: 20, profile: { name: 'Jugador', av: 0, photo: '', pass: '', lock: false } };
+  let S = { balance: 1000, stats: { played: 0, won: 0, net: 0 }, sound: true, sec: 30, blind: 20, profile: { name: 'Jugador', av: 0, photo: '', pass: '', lock: false }, speed: 'normal' };
   try { const r = JSON.parse(localStorage.getItem('th_state_v1')); if (r) S = Object.assign(S, r); } catch (e) {}
   S.profile = Object.assign({ name: 'Jugador', av: 0, photo: '', pass: '', lock: false }, S.profile);
   const save = () => { try { localStorage.setItem('th_state_v1', JSON.stringify(S)); } catch (e) {} };
@@ -3064,7 +3069,7 @@
   /* ---------- Motor (solo el líder / solitario) ---------- */
   let T = null, V = null, role = 'solo', mySeat = 2, tm = null, nxt = null, peer = null, hostConn = null, conns = {};
   const mkSeat = (i, id, name, av, stack, bot) => ({ i, id, name, av, stack, cards: [], bet: 0, tot: 0, folded: false, allin: false, acted: false, bot: !!bot, in: false, last: '', hs: '', gone: false, leave: false });
-  const mkTable = (n) => ({ n, seats: Array(n).fill(null), btn: -1, sb: -1, bb: -1, phase: 'wait', board: [], deck: [], cur: 0, minRaise: 20, turn: -1, deadline: 0, blind: S.blind, sec: S.sec, hand: 0, show: false, res: null, nextAt: 0, players: {} });
+  const mkTable = (n) => ({ n, seats: Array(n).fill(null), btn: -1, sb: -1, bb: -1, phase: 'wait', board: [], deck: [], cur: 0, minRaise: 20, turn: -1, deadline: 0, blind: S.blind, sec: S.sec, speed: S.speed || 'normal', nextTotal: 6500, hand: 0, show: false, res: null, nextAt: 0, players: {} });
   const setMyPhoto = () => { if (S.profile.photo) PHOTOS[myId] = S.profile.photo; else delete PHOTOS[myId]; };
   function addPlayer(id, name, av, stack, bot, seat) { T.players[id] = { id, name, av, stack, bot: !!bot, seat: -1 }; if (seat >= 0) sit(id, seat); }
   function sit(id, i) {
@@ -3080,6 +3085,7 @@
     addPlayer('b1', 'Marta', 3, 1000, true, 0); addPlayer('b2', 'Dani', 4, 1000, true, 1); addPlayer('me', S.profile.name, S.profile.av, Number.isFinite(S.balance) ? S.balance : 1000, false, 2);
     setMyPhoto(); sync();
   }
+  const SPD = { lento: 1.6, normal: 1, rapido: .55, turbo: .3 }, K = () => SPD[T && T.speed] || 1;
   const clearT = () => { clearTimeout(tm); tm = null; };
   const pot = () => T.seats.reduce((a, s) => a + (s ? s.tot : 0), 0);
   const canAct = s => s && s.in && !s.folded && !s.allin;
@@ -3109,7 +3115,7 @@
   function setTurn() {
     clearT(); const s = T.seats[T.turn]; T.deadline = Date.now() + T.sec * 1000;
     if (s.leave || s.gone) { tm = setTimeout(() => doAct(s.i, T.cur > s.bet ? 'fold' : 'check'), 400); return; }
-    if (s.bot) tm = setTimeout(() => botAct(s), 800 + Math.random() * 1000);
+    if (s.bot) tm = setTimeout(() => botAct(s), (800 + Math.random() * 1000) * K());
     else tm = setTimeout(() => doAct(s.i, T.cur > s.bet ? 'fold' : 'check'), T.sec * 1000 + 300);
   }
 
@@ -3128,10 +3134,10 @@
     const dealStreet = () => {
       T.phase = { pre: 'flop', flop: 'turn', turn: 'river' }[T.phase];
       const n = T.phase === 'flop' ? 3 : 1; for (let k = 0; k < n; k++) T.board.push(T.deck.pop());
-      if (T.seats.filter(canAct).length < 2) { T.turn = -1; tm = setTimeout(proceed, 2800); return sync(); }
+      if (T.seats.filter(canAct).length < 2) { T.turn = -1; tm = setTimeout(proceed, 2800 * K()); return sync(); }
       T.turn = nextSeat(T.btn, canAct); setTurn(); sync();
     };
-    if (runout && !T.show) { T.show = true; T.turn = -1; tm = setTimeout(dealStreet, 2600); return sync(); }
+    if (runout && !T.show) { T.show = true; T.turn = -1; tm = setTimeout(dealStreet, 2600 * K()); return sync(); }
     dealStreet();
   }
 
@@ -3186,7 +3192,7 @@
     Object.keys(won).forEach(i => { T.seats[i].stack += won[i]; });
     T.phase = 'over'; T.turn = -1; T.res = { won, pot: P, fold: byFold, net: {} };
     T.seats.forEach(s => { if (s && s.in) T.res.net[s.i] = (won[s.i] || 0) - s.tot; });
-    T.nextAt = Date.now() + 6500; nxt = setTimeout(startHand, 6500); sync();
+    T.nextTotal = 6500 * K(); T.nextAt = Date.now() + T.nextTotal; nxt = setTimeout(startHand, T.nextTotal); sync();
   }
 
   /* ---------- Sincronización ---------- */
@@ -3195,10 +3201,10 @@
   const bc = (m, except) => Object.values(conns).forEach(c => { if (c.open && c.peer !== except) { try { c.send(m); } catch (e) {} } });
   const mask = (forI) => ({
     n: T.n, btn: T.btn, sb: T.sb, bb: T.bb, phase: T.phase, board: T.board, cur: T.cur, minRaise: T.minRaise, turn: T.turn, blind: T.blind, hand: T.hand, show: T.show, res: T.res, sec: T.sec,
-    dl: Math.max(0, T.deadline - Date.now()), nx: Math.max(0, T.nextAt - Date.now()),
+    dl: Math.max(0, T.deadline - Date.now()), nx: Math.max(0, T.nextAt - Date.now()), nt: T.nextTotal || 6500, speed: T.speed,
     players: playerList(),
     seats: T.seats.map(s => s && { i: s.i, id: s.id, leave: s.leave, gone: s.gone, name: s.name, av: s.av, stack: s.stack, bet: s.bet, tot: s.tot, folded: s.folded, allin: s.allin, in: s.in, last: s.last, hs: s.hs, bot: s.bot,
-      cards: (s.i === forI || (T.show && !s.folded)) ? s.cards : s.cards.map(() => null) })
+      cards: (s.i === forI || T.phase === 'over' || (T.show && !s.folded)) ? s.cards : s.cards.map(() => null) })
   });
   function sync() {
     if (role === 'guest') return;
@@ -3271,7 +3277,7 @@
         <div class="bet-circle">${s.bet > 0 ? `<div class="chip-stack">${chips(s.bet).map((v, k) => `<div class="mini-chip chip-c-${[1, 5, 10, 25, 50, 100, 500].filter(x => x <= v).pop()}" style="bottom:${k * 3}px;">${v}</div>`).join('')}</div>` : '<span class="bet-circle-placeholder"></span>'}</div>
         <div class="bet-amount-tag">${s.bet > 0 ? fmt(s.bet) : ''}</div>
         <div class="th-last ${won && V.phase === 'over' ? 'win' : ''}">${esc(label || '')}</div>
-        <div class="spot-top-bar"><div class="spot-owner-pill" data-action="view-player" data-player-id="${esc(s.id)}"><img src="${avSrc(s.id, s.av)}" alt="" /><div class="spot-owner-info"><span class="spot-owner-name">${esc(s.name)}${badges}</span><span class="spot-owner-balance">💰 ${fmt(s.stack)}</span></div></div>
+        <div class="spot-top-bar"><div class="spot-owner-pill" data-action="view-player" data-player-id="${esc(s.id)}"><img src="${avSrc(s.id, s.av)}" alt="" /><div class="spot-owner-info"><span class="spot-owner-name"><span class="th-nm" title="${esc(s.name)}">${esc(s.name)}</span>${badges}</span><span class="spot-owner-balance">💰 ${fmt(s.stack)}</span></div></div>
           ${online && mine ? `<button class="close-spot-btn" data-action="stand" title="${s.leave ? 'Cancelar: seguir sentado' : 'Levantarme (ser espectador)'}">×</button>` : ''}</div>
         <div class="th-stack">${s.allin ? 'ALL-IN' : (s.leave ? 'Se levantará' : '')}</div></div>`;
     }).join('');
@@ -3283,7 +3289,7 @@
     bc.style.display = V.phase === 'wait' ? '' : 'none'; pc.classList.toggle('active', PLAY.includes(V.phase)); sd.classList.toggle('active', V.phase === 'over');
     $('btn-deal').style.display = role === 'guest' ? 'none' : '';
     $('mp-status-hint').textContent = !iSeated ? ((mpl2 && mpl2.stack > 0) ? '👁 Espectador · pulsa + en un asiento para jugar' : (role === 'guest' ? '💸 Sin fichas · el líder puede reiniciar la mesa desde Ajustes' : '💸 Sin fichas · usa “Reinicio” en Ajustes')) : (role === 'guest' ? 'Esperando a que el líder reparta…' : (V.seats.filter(s => s).length < 2 ? 'Esperando jugadores…' : ''));
-    $('blind-select').disabled = $('turn-duration-select').disabled = role === 'guest';
+    $('blind-select').disabled = $('turn-duration-select').disabled = $('speed-select').disabled = role === 'guest'; if (V.speed) $('speed-select').value = V.speed;
     if (PLAY.includes(V.phase) && me) {
       const my = V.turn === mySeat, toCall = Math.min(V.cur - me.bet, me.stack), ts = V.seats[V.turn];
       $('turn-avatar').src = ts ? avSrc(ts.id, ts.av) : ''; $('turn-indicator').textContent = my ? '¡Es tu turno!' : (V.turn < 0 ? 'Repartiendo las cartas restantes…' : 'Turno: ' + (ts ? ts.name : '…'));
@@ -3317,7 +3323,7 @@
     }
     if (V.phase === 'over') {
       const rem = Math.max(0, (V.nlocal - Date.now()) / 1000);
-      $('post-round-countdown-text').textContent = `Nueva mano en ${Math.ceil(rem)}s...`; $('post-round-fill').style.width = (100 * (1 - rem / 6.5)) + '%';
+      $('post-round-countdown-text').textContent = `Nueva mano en ${Math.ceil(rem)}s...`; $('post-round-fill').style.width = (100 * (1 - rem / ((V.nt || 6500) / 1000))) + '%';
     }
   }, 250);
 
@@ -3338,6 +3344,8 @@
   $('blind-select').value = S.blind; $('turn-duration-select').value = S.sec;
   $('blind-select').onchange = e => { S.blind = +e.target.value; save(); };
   $('turn-duration-select').onchange = e => { S.sec = +e.target.value; save(); };
+  $('speed-select').value = S.speed;
+  $('speed-select').onchange = e => { S.speed = e.target.value; save(); if (T && role !== 'guest') { T.speed = S.speed; sync(); } };
 
   /* ---------- Navegación, perfil y banca ---------- */
   function switchView(id) { document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === id)); document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.view === id)); }
@@ -3505,7 +3513,7 @@
     });
   }
   function resume() {
-    if (PLAY.includes(T.phase)) { if (T.turn >= 0) setTurn(); else tm = setTimeout(proceed, 1500); }
+    if (PLAY.includes(T.phase)) { if (T.turn >= 0) setTurn(); else tm = setTimeout(proceed, 1500 * K()); }
     else if (T.phase === 'over') nxt = setTimeout(startHand, Math.max(1500, T.nextAt - Date.now()));
   }
   function becomeHost(m) {
