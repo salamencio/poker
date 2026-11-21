@@ -2830,6 +2830,16 @@
         <strong style="font-size:.82rem;color:var(--gold-bright);">Jugadores en la mesa:</strong>
         <div id="mp-players-list"></div>
       </div>
+      <details style="margin-top:14px;"><summary style="cursor:pointer;color:var(--gold-bright);font-weight:700;font-size:.85rem;">Opciones de conexión (si te quedas en “Conectando…”)</summary>
+        <p style="font-size:.78rem;color:var(--text-muted);margin:8px 0;">Si no consigues conectar, tu red probablemente bloquea la conexión directa. Crea una cuenta gratis en metered.ca (plan Free), genera una credencial TURN y pégala aquí. Solo hace falta en el dispositivo de quien no conecta.</p>
+        <div class="mp-grid">
+          <input type="text" class="styled-input" id="net-user" placeholder="Usuario TURN" autocomplete="off" />
+          <input type="text" class="styled-input" id="net-cred" placeholder="Credencial TURN" autocomplete="off" />
+          <input type="text" class="styled-input" id="net-host" placeholder="Servidor (por defecto standard.relay.metered.ca)" autocomplete="off" />
+        </div>
+        <label class="toggle-keep" style="margin-top:8px;"><input type="checkbox" id="net-force" /> Forzar relé (todo el tráfico pasa por TURN)</label>
+        <button class="mini-btn gold-outline" id="btn-save-net" style="margin-top:8px;">Guardar opciones de conexión</button>
+      </details>
       <div class="status-toast" id="mp-feedback" style="margin-top:12px;"></div>
     </div></div>
   </section>
@@ -2976,7 +2986,18 @@
     { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
     { urls: 'turns:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
   ], iceCandidatePoolSize: 4 } };
-  const mkPeer = id => new Peer(id || undefined, ICE);
+  const iceServers = () => {
+    const n = S.net, base = ICE.config.iceServers.slice();
+    if (!(n.user && n.cred)) return base;
+    const d = (n.host || 'standard.relay.metered.ca').trim(), mine = [{ urls: 'stun:stun.relay.metered.ca:80' }, { urls: `turn:${d}:80`, username: n.user, credential: n.cred }, { urls: `turn:${d}:443`, username: n.user, credential: n.cred }, { urls: `turns:${d}:443?transport=tcp`, username: n.user, credential: n.cred }];
+    return n.force ? mine.filter(x => String(x.urls).startsWith('turn')) : [...mine, ...base];
+  };
+  const mkPeer = id => {
+    const cfg = { config: Object.assign({ iceServers: iceServers(), iceCandidatePoolSize: 4 }, S.net.force && S.net.user ? { iceTransportPolicy: 'relay' } : {}) };
+    const p = new Peer(id || undefined, cfg);
+    p.on('disconnected', () => setTimeout(() => { try { if (!p.destroyed) p.reconnect(); } catch (e) {} }, 1000));
+    return p;
+  };
   const PHOTOS = {}; let myId = 'me';
   const AV = [avatar('♠', '#155d3e', '#08291b', '#f6df8d'), avatar('♦', '#7b1e26', '#2b090d', '#ffd166'), avatar('♣', '#1b3b5a', '#0b1929', '#90e0ef'), avatar('♥', '#6a1b4d', '#24081a', '#ffafcc'), avatar('♛', '#8c6218', '#3b2706', '#fff3b0'), avatar('★', '#2d3a3a', '#111717', '#d4af37')];
   const avSrc = (id, av) => PHOTOS[id] || AV[av] || AV[0];
@@ -3038,6 +3059,7 @@
   /* ---------- Estado persistente ---------- */
   let S = { balance: 1000, stats: { played: 0, won: 0, net: 0 }, sound: true, sec: 30, blind: 20, profile: { name: 'Jugador', av: 0, photo: '', pass: '', lock: false }, speed: 'normal' };
   try { const r = JSON.parse(localStorage.getItem('th_state_v1')); if (r) S = Object.assign(S, r); } catch (e) {}
+  S.net = Object.assign({ user: '', cred: '', host: '', force: false }, S.net);
   S.profile = Object.assign({ name: 'Jugador', av: 0, photo: '', pass: '', lock: false }, S.profile);
   const save = () => { try { localStorage.setItem('th_state_v1', JSON.stringify(S)); } catch (e) {} };
 
@@ -3482,15 +3504,26 @@
   }
   function join(code) {
     if (typeof Peer === 'undefined') return toast('No se pudo cargar PeerJS. Revisa tu conexión.');
-    leave(); toast('Conectando…'); peer = mkPeer();
-    peer.on('error', e => { if (e.type === 'peer-unavailable' && role === 'guest') return; toast('No se pudo conectar (' + e.type + ')'); });
+    leave(); toast('Conectando con el servidor…'); peer = mkPeer(); const my = peer; let attempts = 0, finished = false;
+    peer.on('error', e => {
+      if (e.type === 'peer-unavailable') { if (role === 'guest') return; finished = true; return toast('No existe ninguna sala con el código ' + code.toUpperCase() + '. Revisa el código (o que el líder siga con la sala abierta).'); }
+      toast('No se pudo conectar (' + e.type + ')');
+    });
     peer.on('open', id => {
-      const c = peer.connect('thr-' + code.toLowerCase(), { reliable: true });
-      setTimeout(() => { if (role !== 'guest' && peer) toast('Sigue sin conectar… revisa el código o prueba con otra red (WiFi / datos móviles).'); }, 12000);
-      c.on('open', () => {
-        clearT(); clearTimeout(nxt); role = 'guest'; T = null; mySeat = -1; myId = id; setMyPhoto(); setMp(true); attachGuest(c); sendJoin(c);
-        toast('Conectado a ' + code.toUpperCase() + ' como espectador. Pulsa “+” en un asiento libre para jugar.'); switchView('table-view');
-      });
+      const attempt = () => {
+        if (finished || peer !== my) return;
+        if (++attempts > 3) { finished = true; return toast('No se pudo establecer la conexión directa. Tu red parece bloquearla: abre “Opciones de conexión” e introduce un servidor TURN.'); }
+        toast(`Buscando la sala… (intento ${attempts}/3)`);
+        const c = peer.connect('thr-' + code.toLowerCase(), { reliable: true }); let ok = false;
+        const poll = setInterval(() => { if (ok || finished) return clearInterval(poll); const st = c.peerConnection && c.peerConnection.iceConnectionState; if (st) toast(`Estableciendo la conexión… (${st}, intento ${attempts}/3)`); }, 1000);
+        const to = setTimeout(() => { if (ok || finished) return; clearInterval(poll); try { c.close(); } catch (e) {} attempt(); }, 10000);
+        c.on('open', () => {
+          ok = true; finished = true; clearTimeout(to); clearInterval(poll);
+          clearT(); clearTimeout(nxt); role = 'guest'; T = null; mySeat = -1; myId = id; setMyPhoto(); setMp(true); attachGuest(c); sendJoin(c);
+          toast('Conectado a ' + code.toUpperCase() + ' como espectador. Pulsa “+” en un asiento libre para jugar.'); switchView('table-view');
+        });
+      };
+      attempt();
     });
   }
   function rejoin(code, tries) {
@@ -3539,6 +3572,8 @@
     };
     start(15); sync();
   }
+  $('net-user').value = S.net.user; $('net-cred').value = S.net.cred; $('net-host').value = S.net.host; $('net-force').checked = S.net.force;
+  $('btn-save-net').onclick = () => { S.net = { user: $('net-user').value.trim(), cred: $('net-cred').value.trim(), host: $('net-host').value.trim(), force: $('net-force').checked }; save(); toast('Opciones de conexión guardadas. Vuelve a intentar unirte a la sala.'); };
   $('btn-join-room').onclick = () => { const c = $('mp-join-code').value.trim(); if (c) join(c); else toast('Introduce un código de sala.'); };
   $('btn-copy-code').onclick = () => { navigator.clipboard && navigator.clipboard.writeText($('host-code-text').textContent); toast('Código copiado'); };
   $('btn-copy-link').onclick = () => { navigator.clipboard && navigator.clipboard.writeText(location.origin + location.pathname + '?sala=' + $('host-code-text').textContent); toast('Enlace copiado'); };
