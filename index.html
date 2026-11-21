@@ -2968,6 +2968,15 @@
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const fmt = n => Math.round(n).toLocaleString('es-ES') + ' €';
   const avatar = (sym, a, b, f) => 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${a}"/><stop offset="100%" stop-color="${b}"/></linearGradient></defs><circle cx="50" cy="50" r="50" fill="url(#g)"/><text x="50" y="64" text-anchor="middle" font-family="Georgia,serif" font-weight="bold" font-size="46" fill="${f}">${sym}</text></svg>`);
+  /* Servidores ICE: STUN para conectar directo y TURN como relé cuando la red de alguien bloquea la conexión directa.
+     Para más fiabilidad crea credenciales gratis en metered.ca y sustituye las de "openrelayproject". */
+  const ICE = { config: { iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }, { urls: 'stun:stun.relay.metered.ca:80' },
+    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turns:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
+  ], iceCandidatePoolSize: 4 } };
+  const mkPeer = id => new Peer(id || undefined, ICE);
   const PHOTOS = {}; let myId = 'me';
   const AV = [avatar('♠', '#155d3e', '#08291b', '#f6df8d'), avatar('♦', '#7b1e26', '#2b090d', '#ffd166'), avatar('♣', '#1b3b5a', '#0b1929', '#90e0ef'), avatar('♥', '#6a1b4d', '#24081a', '#ffafcc'), avatar('♛', '#8c6218', '#3b2706', '#fff3b0'), avatar('★', '#2d3a3a', '#111717', '#d4af37')];
   const avSrc = (id, av) => PHOTOS[id] || AV[av] || AV[0];
@@ -3446,7 +3455,7 @@
   $('btn-create-room').onclick = () => {
     if (typeof Peer === 'undefined') return toast('No se pudo cargar PeerJS. Revisa tu conexión.');
     leave(); const code = 'TH-' + Math.floor(1000 + Math.random() * 9000);
-    peer = new Peer('thr-' + code.toLowerCase());
+    peer = mkPeer('thr-' + code.toLowerCase());
     peer.on('error', e => toast('Error de sala: ' + e.type + (e.type === 'unavailable-id' ? ' (inténtalo de nuevo)' : '')));
     peer.on('open', () => {
       clearT(); clearTimeout(nxt); role = 'host'; myId = 'me'; T = mkTable(9); addPlayer('me', S.profile.name, S.profile.av, Number.isFinite(S.balance) ? S.balance : 1000, false, 6); setMyPhoto();
@@ -3473,10 +3482,11 @@
   }
   function join(code) {
     if (typeof Peer === 'undefined') return toast('No se pudo cargar PeerJS. Revisa tu conexión.');
-    leave(); toast('Conectando…'); peer = new Peer();
+    leave(); toast('Conectando…'); peer = mkPeer();
     peer.on('error', e => { if (e.type === 'peer-unavailable' && role === 'guest') return; toast('No se pudo conectar (' + e.type + ')'); });
     peer.on('open', id => {
       const c = peer.connect('thr-' + code.toLowerCase(), { reliable: true });
+      setTimeout(() => { if (role !== 'guest' && peer) toast('Sigue sin conectar… revisa el código o prueba con otra red (WiFi / datos móviles).'); }, 12000);
       c.on('open', () => {
         clearT(); clearTimeout(nxt); role = 'guest'; T = null; mySeat = -1; myId = id; setMyPhoto(); setMp(true); attachGuest(c); sendJoin(c);
         toast('Conectado a ' + code.toUpperCase() + ' como espectador. Pulsa “+” en un asiento libre para jugar.'); switchView('table-view');
@@ -3501,7 +3511,7 @@
   function transferLeader(G) {
     const c = conns[G]; if (role !== 'host' || !c || !c.open) return $('settings-feedback').textContent = 'Ese jugador ya no está conectado.';
     const code = $('host-code-text').textContent, fb = $('settings-feedback'); fb.textContent = 'Traspasando el liderazgo…';
-    const np = new Peer();
+    const np = mkPeer();
     np.on('error', e => { if (e.type !== 'peer-unavailable') fb.textContent = 'No se pudo traspasar (' + e.type + ')'; });
     np.on('open', npId => {
       clearT(); clearTimeout(nxt);
@@ -3522,7 +3532,7 @@
     Object.keys(PHOTOS).forEach(k => delete PHOTOS[k]); Object.assign(PHOTOS, m.ph || {}); chatMsgs = m.ch || [];
     toast('Eres el nuevo líder. Preparando la sala…');
     const start = tries => {
-      peer = new Peer('thr-' + m.code.toLowerCase());
+      peer = mkPeer('thr-' + m.code.toLowerCase());
       peer.on('error', e => { if (e.type === 'unavailable-id' && tries > 0) { try { peer.destroy(); } catch (x) {} setTimeout(() => start(tries - 1), 1000); } else if (e.type !== 'peer-unavailable') toast('Error de sala: ' + e.type); });
       peer.on('open', () => { $('host-code-text').textContent = m.code; $('host-room-info').style.display = 'flex'; setMp(true); renderChat(); updChat(); toast('Eres el nuevo líder de la sala ' + m.code + '.'); resume(); sync(); });
       peer.on('connection', hostOnConnection);
